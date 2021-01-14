@@ -2,10 +2,13 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
-import RegisterDto from './register.dto';
-import PostgresErrorCode from '../../database/postgresErrorCode.enum';
-import { UserService } from '../user/user.service';
 import { userEntityToClass } from './auth.helpers';
+import ChangePasswordDto from './dto/change-password.dto';
+import ForgotPasswordDto from './dto/forgot-password.dto';
+import RegisterDto from './dto/register.dto';
+import { UserDto } from '../user/user.dto';
+import { UserService } from '../user/user.service';
+import PostgresErrorCode from '../../database/postgresErrorCode.enum';
 
 @Injectable()
 export class AuthService {
@@ -49,6 +52,45 @@ export class AuthService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  async resetPassword(forgotPasswordDto: ForgotPasswordDto) {
+    const user = await this.usersService.getUserByEmail(
+      forgotPasswordDto.email,
+    );
+
+    if (user) {
+      const token = this.jwtService.sign(userEntityToClass(user));
+      const forgottenPasswordUrl = `/auth/reset?token=${token}`;
+
+      // TODO send email with the URL
+      console.log(forgottenPasswordUrl);
+    }
+  }
+
+  async changePassword(token: string, changePasswordDto: ChangePasswordDto) {
+    let user: UserDto;
+
+    try {
+      user = this.jwtService.verify(token);
+    } catch (error) {
+      throw new HttpException(
+        'The reset password token has expired!',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const { email } = user;
+    const currentUser = await this.usersService.getUserByEmail(email);
+
+    if (!currentUser) {
+      throw new HttpException('User not found!', HttpStatus.NOT_FOUND);
+    }
+
+    await this.usersService.changeUserPassword({
+      id: currentUser.id,
+      password: changePasswordDto.password,
+    });
   }
 
   private static async verifyPassword(

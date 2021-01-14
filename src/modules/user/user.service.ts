@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { CreateUserDto } from './user.dto';
+import { CreateUserDto, UserPasswordDto } from './user.dto';
 import { User } from './user.entity';
 
 @Injectable()
@@ -32,5 +32,17 @@ export class UserService {
     await this.usersRepository.save(newUser);
 
     return newUser;
+  }
+
+  async changeUserPassword({ id, password }: UserPasswordDto) {
+    const user = await this.usersRepository.findOne(id);
+
+    if (!user) {
+      throw new HttpException('User not found!', HttpStatus.NOT_FOUND);
+    }
+
+    user.password = password;
+
+    await this.usersRepository.save(user);
   }
 }
