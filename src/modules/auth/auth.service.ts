@@ -8,6 +8,7 @@ import ForgotPasswordDto from './dto/forgot-password.dto';
 import RegisterDto from './dto/register.dto';
 import { UserDto } from '../user/user.dto';
 import { UserService } from '../user/user.service';
+import { ValidationException } from '../../exceptions/validation-exception.dto';
 import PostgresErrorCode from '../../database/postgresErrorCode.enum';
 
 @Injectable()
@@ -41,10 +42,9 @@ export class AuthService {
       );
     } catch (error) {
       if (error?.code === PostgresErrorCode.UniqueViolation) {
-        throw new HttpException(
-          'User with that email already exists!',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new ValidationException({
+          email: ['User with that email already exists!'],
+        });
       }
 
       throw new HttpException(
@@ -103,10 +103,9 @@ export class AuthService {
     );
 
     if (!isPasswordMatching) {
-      throw new HttpException(
-        'Wrong email or password!',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new ValidationException({
+        email: ['Wrong email or password!'],
+      });
     }
   }
 }
