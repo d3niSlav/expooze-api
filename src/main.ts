@@ -17,7 +17,13 @@ require('dotenv').config();
 const port = process.env.PORT || 3000;
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { cors: true });
+  const app = await NestFactory.create(AppModule, { bodyParser: true });
+
+  app.enableCors({
+    credentials: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    origin: true,
+  });
 
   app.useGlobalFilters(
     new HttpExceptionFilter(),
