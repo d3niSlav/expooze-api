@@ -10,12 +10,16 @@ import { UserDto } from '../user/user.dto';
 import { UserService } from '../user/user.service';
 import { ValidationException } from '../../exceptions/validation-exception.dto';
 import PostgresErrorCode from '../../database/postgresErrorCode.enum';
+import { EmailOptions, MailgunService } from '@nextnm/nestjs-mailgun';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UserService,
     private jwtService: JwtService,
+    private emailService: MailgunService,
+    private configService: ConfigService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
@@ -61,10 +65,17 @@ export class AuthService {
 
     if (user) {
       const token = this.jwtService.sign(userEntityToClass(user));
-      const forgottenPasswordUrl = `/auth/reset?token=${token}`;
+      const forgottenPasswordUrl = `${this.configService.get(
+        'CLIENT_BASE_ROUTE',
+      )}/reset?token=${token}`;
+      const data: EmailOptions = {
+        from: this.configService.get('OFFICE_EMAIL_DOMAIN'),
+        to: forgotPasswordDto.email,
+        subject: 'Password reset',
+        html: `<p><a href="${forgottenPasswordUrl}">Click here</a> to reset your password.</p>`,
+      };
 
-      // TODO send email with the URL
-      console.log(forgottenPasswordUrl);
+      await this.emailService.sendEmail(data);
     }
   }
 
