@@ -18,10 +18,10 @@ const getConfig = (env = '.env'): TypeOrmModuleOptions => {
     database: envConfig?.DATABASE_NAME || process.env.DATABASE_NAME,
     synchronize: false,
     namingStrategy: new CustomNamingStrategy(),
-    entities: [__dirname + '/../**/*.entity.{ts,js}'],
+    entities: [__dirname + '/../../**/**.entity{.ts,.js}'],
     migrations: [
-      __dirname + '/../database/seeds/**/*.ts',
-      __dirname + '/../database/migrations/**/*.ts',
+      __dirname + '/../../database/seeds/**/*.ts',
+      __dirname + '/../../database/migrations/**/*.ts',
     ],
     cli: {
       entitiesDir: '/src/database/entity',
