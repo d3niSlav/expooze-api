@@ -1,7 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { ValidationError } from 'class-validator';
-import cors from 'cors';
+import * as cors from 'cors';
 
 import { BadRequestExceptionFilter } from './exceptions/bad-request.filter';
 import { mapErrorMessagesFromValidator } from './exceptions/exceptions.helpers';

@@ -14,8 +14,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         username: configService.get('DATABASE_USERNAME'),
         password: configService.get('DATABASE_PASSWORD'),
         database: configService.get('DATABASE_NAME'),
-        entities: [__dirname + '/../**/*.entity.{ts,js}'],
-        synchronize: true,
+        synchronize: false,
+        ssl: true,
+        entities: [__dirname + '/../**/**.entity{.ts,.js}'],
+        extra: {
+          ssl: {
+            rejectUnauthorized: false,
+          },
+        },
       }),
     }),
   ],
