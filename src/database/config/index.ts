@@ -27,6 +27,12 @@ const getConfig = (env = '.env'): TypeOrmModuleOptions => {
       entitiesDir: '/src/database/entity',
       migrationsDir: '/src/database/migrations',
     },
+    ssl: true,
+    extra: {
+      ssl: {
+        rejectUnauthorized: false,
+      },
+    },
   };
 };
 
