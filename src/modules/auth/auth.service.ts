@@ -1,17 +1,20 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { EmailOptions, MailgunService } from '@nextnm/nestjs-mailgun';
 import * as bcrypt from 'bcrypt';
 
-import { userEntityToClass } from './auth.helpers';
+import {
+  getResetPasswordMailTemplate,
+  userEntityToClass,
+} from './auth.helpers';
 import ChangePasswordDto from './dto/change-password.dto';
 import ForgotPasswordDto from './dto/forgot-password.dto';
 import RegisterDto from './dto/register.dto';
 import { UserDto } from '../user/user.dto';
 import { UserService } from '../user/user.service';
-import { ValidationException } from '../../exceptions/validation-exception.dto';
 import PostgresErrorCode from '../../database/postgresErrorCode.enum';
-import { EmailOptions, MailgunService } from '@nextnm/nestjs-mailgun';
-import { ConfigService } from '@nestjs/config';
+import { ValidationException } from '../../exceptions/validation-exception.dto';
 
 @Injectable()
 export class AuthService {
@@ -65,14 +68,13 @@ export class AuthService {
 
     if (user) {
       const token = this.jwtService.sign(userEntityToClass(user));
-      const forgottenPasswordUrl = `${this.configService.get(
-        'CLIENT_BASE_ROUTE',
-      )}/reset?token=${token}`;
+      const baseRoute = this.configService.get('CLIENT_BASE_ROUTE');
+      const forgottenPasswordUrl = `${baseRoute}/reset?token=${token}`;
       const data: EmailOptions = {
         from: this.configService.get('OFFICE_EMAIL_DOMAIN'),
         to: forgotPasswordDto.email,
         subject: 'Password reset',
-        html: `<p><a href="${forgottenPasswordUrl}">Click here</a> to reset your password.</p>`,
+        html: getResetPasswordMailTemplate(forgottenPasswordUrl),
       };
 
       await this.emailService.sendEmail(data);
