@@ -10,6 +10,7 @@ import { UserModule } from '../user/user.module';
 import { DatabaseModule } from '../../database/database.module';
 import { TagModule } from '../tag/tag.module';
 import { SubjectModule } from '../subject/subject.module';
+import { TopicModule } from "../topic/topic.module";
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { SubjectModule } from '../subject/subject.module';
     AuthModule,
     TagModule,
     SubjectModule,
+    TopicModule,
     JobTitleModule,
     UserModule,
   ],
