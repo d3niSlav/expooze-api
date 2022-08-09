@@ -11,6 +11,7 @@ import { DatabaseModule } from '../../database/database.module';
 import { TagModule } from '../tag/tag.module';
 import { SubjectModule } from '../subject/subject.module';
 import { TopicModule } from "../topic/topic.module";
+import { InterviewModule } from "../interview/interview.module";
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { TopicModule } from "../topic/topic.module";
     TagModule,
     SubjectModule,
     TopicModule,
+    InterviewModule,
     JobTitleModule,
     UserModule,
   ],
