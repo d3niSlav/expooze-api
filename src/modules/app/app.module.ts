@@ -8,6 +8,7 @@ import { AuthModule } from '../auth/auth.module';
 import { JobTitleModule } from '../job-title/job-title.module';
 import { UserModule } from '../user/user.module';
 import { DatabaseModule } from '../../database/database.module';
+import { TagModule } from "../tag/tag.module";
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { DatabaseModule } from '../../database/database.module';
     }),
     DatabaseModule,
     AuthModule,
+    TagModule,
     JobTitleModule,
     UserModule,
   ],
