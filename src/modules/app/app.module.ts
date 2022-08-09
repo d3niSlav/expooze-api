@@ -14,6 +14,7 @@ import { TopicModule } from '../topic/topic.module';
 import { InterviewModule } from '../interview/interview.module';
 import { PositionModule } from '../position/position.module';
 import { ProgrammingLanguageModule } from '../programmingLanguage/programming-language.module';
+import { QuestionModule } from '../question/question.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { ProgrammingLanguageModule } from '../programmingLanguage/programming-la
     TagModule,
     SubjectModule,
     TopicModule,
+    QuestionModule,
     PositionModule,
     ProgrammingLanguageModule,
     InterviewModule,
