@@ -5,6 +5,7 @@ import * as Joi from 'joi';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from '../auth/auth.module';
+import { JobTitleModule } from '../job-title/job-title.module';
 import { UserModule } from '../user/user.module';
 import { DatabaseModule } from '../../database/database.module';
 
@@ -28,6 +29,7 @@ import { DatabaseModule } from '../../database/database.module';
     }),
     DatabaseModule,
     AuthModule,
+    JobTitleModule,
     UserModule,
   ],
   controllers: [AppController],

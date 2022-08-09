@@ -12,7 +12,7 @@ const getConfig = (env = '.env'): TypeOrmModuleOptions => {
     username: envConfig?.DATABASE_USERNAME || process.env.DATABASE_USERNAME,
     password: envConfig?.DATABASE_PASSWORD || process.env.DATABASE_PASSWORD,
     database: envConfig?.DATABASE_NAME || process.env.DATABASE_NAME,
-    synchronize: false,
+    synchronize: true,
     entities: [__dirname + '/../../**/**.entity{.ts,.js}'],
     migrations: [
       __dirname + '/../../database/seeds/**/*.ts',
@@ -22,12 +22,7 @@ const getConfig = (env = '.env'): TypeOrmModuleOptions => {
       entitiesDir: '/src/database/entity',
       migrationsDir: '/src/database/migrations',
     },
-    ssl: true,
-    extra: {
-      ssl: {
-        rejectUnauthorized: false,
-      },
-    },
+    ssl: false,
   };
 };
 
