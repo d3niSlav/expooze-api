@@ -13,6 +13,7 @@ import { SubjectModule } from '../subject/subject.module';
 import { TopicModule } from '../topic/topic.module';
 import { InterviewModule } from '../interview/interview.module';
 import { PositionModule } from '../position/position.module';
+import { ProgrammingLanguageModule } from '../programmingLanguage/programming-language.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { PositionModule } from '../position/position.module';
     SubjectModule,
     TopicModule,
     PositionModule,
+    ProgrammingLanguageModule,
     InterviewModule,
     JobTitleModule,
     UserModule,
