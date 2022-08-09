@@ -12,6 +12,12 @@ export class SubjectDto implements Subject {
   @IsNumber()
   @IsOptional()
   readonly order?: number;
+
+  @IsNotEmpty()
+  readonly createdAt: string;
+
+  @IsNotEmpty()
+  readonly updatedAt: string;
 }
 
 export class CreateSubjectDto {

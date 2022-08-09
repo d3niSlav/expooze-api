@@ -8,6 +8,12 @@ export class PositionDto implements Position {
 
   @IsNotEmpty()
   readonly title: string;
+
+  @IsNotEmpty()
+  readonly createdAt: string;
+
+  @IsNotEmpty()
+  readonly updatedAt: string;
 }
 
 export class CreatePositionDto {

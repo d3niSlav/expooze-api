@@ -9,9 +9,9 @@ import { JobTitleService } from './job-title.service';
 export class JobTitleController {
   constructor(private readonly jobTitleService: JobTitleService) {}
 
-  @Get()
-  getJobTitle(@Param('key') key) {
-    return this.jobTitleService.getJobTitleByKey(key);
+  @Get(':id')
+  readJobTitle(@Param('id') key) {
+    return this.jobTitleService.readJobTitle(key);
   }
 
   @Post()

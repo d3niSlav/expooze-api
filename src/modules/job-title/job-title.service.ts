@@ -21,13 +21,13 @@ export class JobTitleService {
 
     const newJobTitle = await this.jobTitlesRepository.create(data);
 
-    await this.jobTitlesRepository.save(newJobTitle);
+    const jobTitle = await this.jobTitlesRepository.save(newJobTitle);
 
-    return newJobTitle;
+    return this.readJobTitle(jobTitle.id);
   }
 
-  async getJobTitleByKey(key: string) {
-    const jobTitle = await this.jobTitlesRepository.findOne({ key });
+  async readJobTitle(id: string) {
+    const jobTitle = await this.jobTitlesRepository.findOne(id);
 
     if (!jobTitle) {
       throw new HttpException('Job title not found!', HttpStatus.NOT_FOUND);

@@ -8,6 +8,12 @@ export class InterviewDto implements Interview {
 
   @IsNotEmpty()
   readonly title: string;
+
+  @IsNotEmpty()
+  readonly createdAt: string;
+
+  @IsNotEmpty()
+  readonly updatedAt: string;
 }
 
 export class CreateInterviewDto {

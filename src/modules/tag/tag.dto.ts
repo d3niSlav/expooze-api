@@ -8,6 +8,12 @@ export class TagDto implements Tag {
 
   @IsNotEmpty()
   readonly title: string;
+
+  @IsNotEmpty()
+  readonly createdAt: string;
+
+  @IsNotEmpty()
+  readonly updatedAt: string;
 }
 
 export class CreateTagDto {

@@ -8,6 +8,12 @@ export class TopicDto implements Topic {
 
   @IsNotEmpty()
   readonly title: string;
+
+  @IsNotEmpty()
+  readonly createdAt: string;
+
+  @IsNotEmpty()
+  readonly updatedAt: string;
 }
 
 export class CreateTopicDto {
