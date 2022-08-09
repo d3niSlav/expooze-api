@@ -10,8 +10,9 @@ import { UserModule } from '../user/user.module';
 import { DatabaseModule } from '../../database/database.module';
 import { TagModule } from '../tag/tag.module';
 import { SubjectModule } from '../subject/subject.module';
-import { TopicModule } from "../topic/topic.module";
-import { InterviewModule } from "../interview/interview.module";
+import { TopicModule } from '../topic/topic.module';
+import { InterviewModule } from '../interview/interview.module';
+import { PositionModule } from '../position/position.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { InterviewModule } from "../interview/interview.module";
     TagModule,
     SubjectModule,
     TopicModule,
+    PositionModule,
     InterviewModule,
     JobTitleModule,
     UserModule,
