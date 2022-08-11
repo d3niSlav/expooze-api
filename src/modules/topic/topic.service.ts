@@ -4,22 +4,44 @@ import { Repository } from 'typeorm';
 
 import { CreateTopicDto, TopicDto, UpdateTopicDto } from './topic.dto';
 import { Topic } from './topic.entity';
+import { SubjectDto } from '../subject/subject.dto';
+import { SubjectService } from '../subject/subject.service';
+import { TagDto } from '../tag/tag.dto';
+import { TagService } from '../tag/tag.service';
 
 @Injectable()
 export class TopicService {
   constructor(
+    private subjectsService: SubjectService,
+    private tagsService: TagService,
     @InjectRepository(Topic)
     private topicsRepository: Repository<Topic>,
   ) {}
 
   async createTopic(topicData: CreateTopicDto): Promise<TopicDto> {
-    const newTopic = await this.topicsRepository.create(topicData);
+    const { subjectId, tagIds, ...topic } = topicData;
+
+    const subject = await this.subjectsService.readSubject(subjectId);
+    let tags: TagDto[] = [];
+
+    if (tagIds?.length > 0) {
+      tags = await this.tagsService.readAllTags({ ids: tagIds });
+    }
+
+    const newTopic = await this.topicsRepository.create({
+      ...topic,
+      subject,
+      tags,
+    });
 
     return await this.topicsRepository.save(newTopic);
   }
 
   async readTopic(id: string): Promise<TopicDto> {
-    const topic: TopicDto = await this.topicsRepository.findOneBy({ id });
+    const topic: TopicDto = await this.topicsRepository.findOne({
+      where: { id },
+      relations: ['tags', 'subject'],
+    });
 
     if (!topic) {
       throw new HttpException('Topic not found!', HttpStatus.NOT_FOUND);
@@ -33,9 +55,39 @@ export class TopicService {
   }
 
   async updateTopic(id: string, topicData: UpdateTopicDto): Promise<TopicDto> {
-    const topic = await this.readTopic(id);
+    const { subjectId, tagIds, ...newTopicData } = topicData;
 
-    return await this.topicsRepository.save({ ...topic, ...topicData, id });
+    const topic = await this.readTopic(id);
+    let subject: SubjectDto = topic.subject;
+    let tags: TagDto[] = topic.tags;
+
+    if (tagIds?.length > 0) {
+      const newTagIds = tagIds.filter(
+        (tagId) => tags.findIndex((tag) => tag.id === tagId) < 0,
+      );
+      const updatedTags = tags.filter((tag) => tagIds.includes(tag.id));
+
+      tags = [...updatedTags];
+
+      if (newTagIds.length > 0) {
+        tags = [
+          ...tags,
+          ...(await this.tagsService.readAllTags({ ids: newTagIds })),
+        ];
+      }
+    }
+
+    if (topic.subject.id !== subjectId) {
+      subject = await this.subjectsService.readSubject(subjectId);
+    }
+
+    return await this.topicsRepository.save({
+      ...topic,
+      ...newTopicData,
+      id,
+      subject,
+      tags,
+    });
   }
 
   async deleteTopic(id: string): Promise<boolean> {

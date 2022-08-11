@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 import { CreateTagDto, TagDto, UpdateTagDto } from './tag.dto';
 import { Tag } from './tag.entity';
@@ -28,8 +28,17 @@ export class TagService {
     return tag;
   }
 
-  async readAllTags(): Promise<TagDto[]> {
-    return await this.tagsRepository.find();
+  async readAllTags(filters?: { ids?: string[] }): Promise<TagDto[]> {
+    let filter = {};
+    console.log(filters.ids, 'lon');
+    if (filters?.ids?.length > 0) {
+      filter = {
+        ...filter,
+        id: In(filters.ids),
+      };
+    }
+
+    return await this.tagsRepository.find({ where: filter });
   }
 
   async updateTag(id: string, tagData: UpdateTagDto): Promise<TagDto> {

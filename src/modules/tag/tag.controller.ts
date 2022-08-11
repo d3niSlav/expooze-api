@@ -20,9 +20,9 @@ export class TagController {
     return this.tagService.createTag(data);
   }
 
-  @Get()
-  readAllTags() {
-    return this.tagService.readAllTags();
+  @Post('list')
+  readAllTags(@Body() filter) {
+    return this.tagService.readAllTags(filter);
   }
 
   @Get(':id')
