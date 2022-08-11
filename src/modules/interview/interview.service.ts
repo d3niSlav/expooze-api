@@ -2,7 +2,11 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { CreateInterviewDto, InterviewDto, UpdateInterviewDto } from './interview.dto';
+import {
+  CreateInterviewDto,
+  InterviewDto,
+  UpdateInterviewDto,
+} from './interview.dto';
 import { Interview } from './interview.entity';
 
 @Injectable()
@@ -12,14 +16,18 @@ export class InterviewService {
     private interviewsRepository: Repository<Interview>,
   ) {}
 
-  async createInterview(interviewData: CreateInterviewDto): Promise<InterviewDto> {
+  async createInterview(
+    interviewData: CreateInterviewDto,
+  ): Promise<InterviewDto> {
     const newInterview = await this.interviewsRepository.create(interviewData);
 
     return await this.interviewsRepository.save(newInterview);
   }
 
   async readInterview(id: string): Promise<InterviewDto> {
-    const interview: InterviewDto = await this.interviewsRepository.findOne(id);
+    const interview: InterviewDto = await this.interviewsRepository.findOneBy({
+      id,
+    });
 
     if (!interview) {
       throw new HttpException('Interview not found!', HttpStatus.NOT_FOUND);
@@ -32,10 +40,17 @@ export class InterviewService {
     return await this.interviewsRepository.find();
   }
 
-  async updateInterview(id: string, interviewData: UpdateInterviewDto): Promise<InterviewDto> {
+  async updateInterview(
+    id: string,
+    interviewData: UpdateInterviewDto,
+  ): Promise<InterviewDto> {
     const interview = await this.readInterview(id);
 
-    return await this.interviewsRepository.save({ ...interview, ...interviewData, id });
+    return await this.interviewsRepository.save({
+      ...interview,
+      ...interviewData,
+      id,
+    });
   }
 
   async deleteInterview(id: string): Promise<boolean> {

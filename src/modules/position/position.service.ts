@@ -2,7 +2,11 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { CreatePositionDto, PositionDto, UpdatePositionDto } from './position.dto';
+import {
+  CreatePositionDto,
+  PositionDto,
+  UpdatePositionDto,
+} from './position.dto';
 import { Position } from './position.entity';
 
 @Injectable()
@@ -19,7 +23,9 @@ export class PositionService {
   }
 
   async readPosition(id: string): Promise<PositionDto> {
-    const position: PositionDto = await this.positionsRepository.findOne(id);
+    const position: PositionDto = await this.positionsRepository.findOneBy({
+      id,
+    });
 
     if (!position) {
       throw new HttpException('Position not found!', HttpStatus.NOT_FOUND);
@@ -32,10 +38,17 @@ export class PositionService {
     return await this.positionsRepository.find();
   }
 
-  async updatePosition(id: string, positionData: UpdatePositionDto): Promise<PositionDto> {
+  async updatePosition(
+    id: string,
+    positionData: UpdatePositionDto,
+  ): Promise<PositionDto> {
     const position = await this.readPosition(id);
 
-    return await this.positionsRepository.save({ ...position, ...positionData, id });
+    return await this.positionsRepository.save({
+      ...position,
+      ...positionData,
+      id,
+    });
   }
 
   async deletePosition(id: string): Promise<boolean> {

@@ -1,5 +1,6 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ValidationError } from 'class-validator';
 import * as cors from 'cors';
 
@@ -19,6 +20,12 @@ const port = process.env.PORT || 3000;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bodyParser: true });
+
+  const config = new DocumentBuilder()
+    .setTitle('Expooze API')
+    .setDescription('Documentation')
+    .setVersion('1.0')
+    .build();
 
   app.use(
     cors({
@@ -45,6 +52,9 @@ async function bootstrap() {
       },
     }),
   );
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
 
   await app.listen(port);
 }

@@ -13,11 +13,11 @@ export class UserService {
   ) {}
 
   async getUserByEmail(email: string): Promise<User> {
-    return await this.usersRepository.findOne({ email });
+    return await this.usersRepository.findOneBy({ email });
   }
 
   async getUserById(id: number) {
-    const user = await this.usersRepository.findOne({ id });
+    const user = await this.usersRepository.findOneBy({ id });
 
     if (!user) {
       throw new HttpException('User not found!', HttpStatus.NOT_FOUND);
@@ -35,7 +35,7 @@ export class UserService {
   }
 
   async changeUserPassword({ id, password }: UserPasswordDto) {
-    const user = await this.usersRepository.findOne(id);
+    const user = await this.usersRepository.findOneBy({ id });
 
     if (!user) {
       throw new HttpException('User not found!', HttpStatus.NOT_FOUND);

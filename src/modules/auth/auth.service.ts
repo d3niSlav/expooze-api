@@ -1,8 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { EmailOptions, MailgunService } from '@nextnm/nestjs-mailgun';
 import * as bcrypt from 'bcrypt';
+import { Options as EmailOptions } from 'mailgun-js';
 
 import {
   getResetPasswordMailTemplate,
@@ -15,13 +15,14 @@ import { UserDto } from '../user/user.dto';
 import { UserService } from '../user/user.service';
 import PostgresErrorCode from '../../database/postgresErrorCode.enum';
 import { ValidationException } from '../../exceptions/validation-exception.dto';
+import { MailService } from '../../services/MailgunService/mailgun.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UserService,
     private jwtService: JwtService,
-    private emailService: MailgunService,
+    private emailService: MailService,
     private configService: ConfigService,
   ) {}
 

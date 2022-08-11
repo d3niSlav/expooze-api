@@ -19,7 +19,7 @@ export class TagService {
   }
 
   async readTag(id: string): Promise<TagDto> {
-    const tag: TagDto = await this.tagsRepository.findOne(id);
+    const tag: TagDto = await this.tagsRepository.findOneBy({ id });
 
     if (!tag) {
       throw new HttpException('Tag not found!', HttpStatus.NOT_FOUND);

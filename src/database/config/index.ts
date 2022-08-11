@@ -18,10 +18,6 @@ const getConfig = (env = '.env'): TypeOrmModuleOptions => {
       __dirname + '/../../database/seeds/**/*.ts',
       __dirname + '/../../database/migrations/**/*.ts',
     ],
-    cli: {
-      entitiesDir: '/src/database/entity',
-      migrationsDir: '/src/database/migrations',
-    },
     ssl: false,
   };
 };

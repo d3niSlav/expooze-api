@@ -19,7 +19,7 @@ export class TopicService {
   }
 
   async readTopic(id: string): Promise<TopicDto> {
-    const topic: TopicDto = await this.topicsRepository.findOne(id);
+    const topic: TopicDto = await this.topicsRepository.findOneBy({ id });
 
     if (!topic) {
       throw new HttpException('Topic not found!', HttpStatus.NOT_FOUND);

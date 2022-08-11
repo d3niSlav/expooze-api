@@ -27,7 +27,7 @@ export class JobTitleService {
   }
 
   async readJobTitle(id: string) {
-    const jobTitle = await this.jobTitlesRepository.findOne(id);
+    const jobTitle = await this.jobTitlesRepository.findOneBy({ id });
 
     if (!jobTitle) {
       throw new HttpException('Job title not found!', HttpStatus.NOT_FOUND);

@@ -19,7 +19,7 @@ export class SubjectService {
   }
 
   async readSubject(id: string): Promise<SubjectDto> {
-    const subject: SubjectDto = await this.subjectsRepository.findOne(id);
+    const subject: SubjectDto = await this.subjectsRepository.findOneBy({ id });
 
     if (!subject) {
       throw new HttpException('Subject not found!', HttpStatus.NOT_FOUND);
@@ -32,10 +32,17 @@ export class SubjectService {
     return await this.subjectsRepository.find();
   }
 
-  async updateSubject(id: string, subjectData: UpdateSubjectDto): Promise<SubjectDto> {
+  async updateSubject(
+    id: string,
+    subjectData: UpdateSubjectDto,
+  ): Promise<SubjectDto> {
     const subject = await this.readSubject(id);
 
-    return await this.subjectsRepository.save({ ...subject, ...subjectData, id });
+    return await this.subjectsRepository.save({
+      ...subject,
+      ...subjectData,
+      id,
+    });
   }
 
   async deleteSubject(id: string): Promise<boolean> {

@@ -19,9 +19,8 @@ export class ProgrammingLanguageService {
   async createProgrammingLanguage(
     programmingLanguageData: CreateProgrammingLanguageDto,
   ): Promise<ProgrammingLanguageDto> {
-    const newProgrammingLanguage = await this.programmingLanguagesRepository.create(
-      programmingLanguageData,
-    );
+    const newProgrammingLanguage =
+      await this.programmingLanguagesRepository.create(programmingLanguageData);
 
     return await this.programmingLanguagesRepository.save(
       newProgrammingLanguage,
@@ -29,9 +28,8 @@ export class ProgrammingLanguageService {
   }
 
   async readProgrammingLanguage(id: string): Promise<ProgrammingLanguageDto> {
-    const programmingLanguage: ProgrammingLanguageDto = await this.programmingLanguagesRepository.findOne(
-      id,
-    );
+    const programmingLanguage: ProgrammingLanguageDto =
+      await this.programmingLanguagesRepository.findOneBy({ id });
 
     if (!programmingLanguage) {
       throw new HttpException(

@@ -23,7 +23,9 @@ export class QuestionService {
   }
 
   async readQuestion(id: string): Promise<QuestionDto> {
-    const question: QuestionDto = await this.questionsRepository.findOne(id);
+    const question: QuestionDto = await this.questionsRepository.findOneBy({
+      id,
+    });
 
     if (!question) {
       throw new HttpException('Question not found!', HttpStatus.NOT_FOUND);
