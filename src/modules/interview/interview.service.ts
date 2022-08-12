@@ -8,10 +8,14 @@ import {
   UpdateInterviewDto,
 } from './interview.dto';
 import { Interview } from './interview.entity';
+import { ProgrammingLanguageService } from '../programmingLanguage/programming-language.service';
+import { SubjectDto } from '../subject/subject.dto';
+import { SubjectService } from '../subject/subject.service';
 
 @Injectable()
 export class InterviewService {
   constructor(
+    private programmingLanguagesService: ProgrammingLanguageService,
     @InjectRepository(Interview)
     private interviewsRepository: Repository<Interview>,
   ) {}
@@ -19,7 +23,16 @@ export class InterviewService {
   async createInterview(
     interviewData: CreateInterviewDto,
   ): Promise<InterviewDto> {
-    const newInterview = await this.interviewsRepository.create(interviewData);
+    const { programmingLanguageId, ...interview } = interviewData;
+
+    const programmingLanguage =
+      await this.programmingLanguagesService.readProgrammingLanguage(
+        programmingLanguageId,
+      );
+    const newInterview = await this.interviewsRepository.create({
+      ...interview,
+      programmingLanguage,
+    });
 
     return await this.interviewsRepository.save(newInterview);
   }
@@ -44,12 +57,21 @@ export class InterviewService {
     id: string,
     interviewData: UpdateInterviewDto,
   ): Promise<InterviewDto> {
+    const { programmingLanguageId, ...newInterviewData } =
+      interviewData;
+
+    const programmingLanguage =
+      await this.programmingLanguagesService.readProgrammingLanguage(
+        programmingLanguageId,
+      );
+
     const interview = await this.readInterview(id);
 
     return await this.interviewsRepository.save({
       ...interview,
-      ...interviewData,
+      ...newInterviewData,
       id,
+      programmingLanguage,
     });
   }
 

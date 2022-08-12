@@ -1,6 +1,7 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 import { ProgrammingLanguage } from './programming-language.entity';
+import { InterviewDto } from "../interview/interview.dto";
 
 export class ProgrammingLanguageDto implements ProgrammingLanguage {
   @IsNotEmpty()
@@ -8,6 +9,10 @@ export class ProgrammingLanguageDto implements ProgrammingLanguage {
 
   @IsNotEmpty()
   readonly title: string;
+
+  @IsOptional()
+  @IsArray()
+  readonly interviews?: InterviewDto[];
 
   @IsNotEmpty()
   readonly createdAt: string;

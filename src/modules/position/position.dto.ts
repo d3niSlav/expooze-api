@@ -1,6 +1,8 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 import { Position } from './position.entity';
+import { JobTitleDto } from '../job-title/job-title.dto';
+import { InterviewDto } from '../interview/interview.dto';
 
 export class PositionDto implements Position {
   @IsNotEmpty()
@@ -8,6 +10,13 @@ export class PositionDto implements Position {
 
   @IsNotEmpty()
   readonly title: string;
+
+  @IsNotEmpty()
+  readonly jobTitle: JobTitleDto;
+
+  @IsArray()
+  @IsOptional()
+  readonly interviews?: InterviewDto[];
 
   @IsNotEmpty()
   readonly createdAt: string;

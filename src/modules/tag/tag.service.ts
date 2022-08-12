@@ -30,7 +30,7 @@ export class TagService {
 
   async readAllTags(filters?: { ids?: string[] }): Promise<TagDto[]> {
     let filter = {};
-    console.log(filters.ids, 'lon');
+
     if (filters?.ids?.length > 0) {
       filter = {
         ...filter,

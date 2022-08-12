@@ -10,8 +10,9 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-import { Tag } from '../tag/tag.entity';
+import { Question } from '../question/question.entity';
 import { Subject } from '../subject/subject.entity';
+import { Tag } from '../tag/tag.entity';
 import { DifficultyLevel } from '../../utils/enums/difficulty-level.enum';
 
 @Unique(['title', 'subject'])
@@ -35,6 +36,10 @@ export class Topic {
 
   @ManyToOne(() => Subject, (subject) => subject.topics)
   subject: Subject;
+
+  @ManyToMany(() => Question, (question) => question.topics, { nullable: true })
+  @JoinTable({ name: 'topics_questions' })
+  questions?: Question[];
 
   @ManyToMany(() => Tag, { nullable: true })
   @JoinTable({ name: 'topics_tags' })

@@ -8,8 +8,9 @@ import {
 } from 'class-validator';
 
 import { Topic } from './topic.entity';
-import { TagDto } from '../tag/tag.dto';
+import { QuestionDto } from '../question/question.dto';
 import { SubjectDto } from '../subject/subject.dto';
+import { TagDto } from '../tag/tag.dto';
 import { DifficultyLevel } from '../../utils/enums/difficulty-level.enum';
 
 export class TopicDto implements Topic {
@@ -28,6 +29,10 @@ export class TopicDto implements Topic {
   @IsOptional()
   @IsNumber()
   readonly order?: number;
+
+  @IsOptional()
+  @IsArray()
+  readonly questions?: QuestionDto[];
 
   @IsOptional()
   @IsArray()

@@ -2,9 +2,14 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+
+import { Interview } from '../interview/interview.entity';
+import { JobTitle } from '../job-title/job-title.entity';
 
 @Entity()
 export class Position {
@@ -15,19 +20,15 @@ export class Position {
   title: string;
 
   @Column({ nullable: true })
-  shortTitle?: string;
-
-  @Column({ nullable: true })
   description?: string;
 
-  @Column({ nullable: false })
-  minSalary?: number;
+  @OneToMany(() => Interview, (interview) => interview.position, {
+    nullable: true,
+  })
+  interviews?: Interview[];
 
-  @Column({ nullable: false })
-  averageSalary?: number;
-
-  @Column({ nullable: false })
-  maxSalary?: number;
+  @ManyToOne(() => JobTitle, (jobTitle) => jobTitle.positions)
+  jobTitle: JobTitle;
 
   @CreateDateColumn()
   createdAt: string;
