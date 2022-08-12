@@ -9,6 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+import { InterviewAnswer } from '../interview-answer/interview-answer.entity';
 import { Tag } from '../tag/tag.entity';
 import { Topic } from '../topic/topic.entity';
 
@@ -29,6 +30,9 @@ export class Subject {
   @ManyToMany(() => Tag, { nullable: true })
   @JoinTable({ name: 'subjects_tags' })
   tags?: Tag[];
+
+  @OneToMany(() => InterviewAnswer, (ia) => ia.interview, { nullable: true })
+  answers?: InterviewAnswer[];
 
   @CreateDateColumn()
   createdAt: string;

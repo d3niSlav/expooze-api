@@ -29,7 +29,9 @@ export class JobTitle {
   @Column({ nullable: false })
   maxSalary?: number;
 
-  @OneToMany(() => Position, (position) => position.jobTitle, { nullable: true })
+  @OneToMany(() => Position, (position) => position.jobTitle, {
+    nullable: true,
+  })
   positions?: Position[];
 
   @CreateDateColumn()

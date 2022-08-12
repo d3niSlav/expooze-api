@@ -9,5 +9,6 @@ import { PositionService } from './position.service';
   imports: [TypeOrmModule.forFeature([Position])],
   providers: [PositionService],
   controllers: [PositionController],
+  exports: [PositionService],
 })
 export class PositionModule {}

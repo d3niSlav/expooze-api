@@ -4,10 +4,12 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
+import { InterviewAnswer } from '../interview-answer/interview-answer.entity';
 import { Topic } from '../topic/topic.entity';
 
 @Entity()
@@ -21,6 +23,9 @@ export class Question {
   @ManyToMany(() => Topic, (topic) => topic.questions, { nullable: true })
   @JoinTable({ name: 'topics_questions' })
   topics?: Topic[];
+
+  @OneToMany(() => InterviewAnswer, (ia) => ia.interview, { nullable: true })
+  answers?: InterviewAnswer[];
 
   @CreateDateColumn()
   createdAt: string;

@@ -3,10 +3,12 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
+import { InterviewAnswer } from '../interview-answer/interview-answer.entity';
 import { Position } from '../position/position.entity';
 import { ProgrammingLanguage } from '../programmingLanguage/programming-language.entity';
 
@@ -23,6 +25,9 @@ export class Interview {
 
   @ManyToOne(() => ProgrammingLanguage, (pl) => pl.interviews)
   programmingLanguage: ProgrammingLanguage;
+
+  @OneToMany(() => InterviewAnswer, (ia) => ia.interview, { nullable: true })
+  answers?: InterviewAnswer[];
 
   @CreateDateColumn()
   createdAt: string;

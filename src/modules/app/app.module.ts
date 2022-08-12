@@ -15,6 +15,7 @@ import { InterviewModule } from '../interview/interview.module';
 import { PositionModule } from '../position/position.module';
 import { ProgrammingLanguageModule } from '../programmingLanguage/programming-language.module';
 import { QuestionModule } from '../question/question.module';
+import { InterviewAnswerModule } from '../interview-answer/interview-answer.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { QuestionModule } from '../question/question.module';
     PositionModule,
     ProgrammingLanguageModule,
     InterviewModule,
+    InterviewAnswerModule,
     JobTitleModule,
     UserModule,
   ],

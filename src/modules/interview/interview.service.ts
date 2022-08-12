@@ -9,8 +9,6 @@ import {
 } from './interview.dto';
 import { Interview } from './interview.entity';
 import { ProgrammingLanguageService } from '../programmingLanguage/programming-language.service';
-import { SubjectDto } from '../subject/subject.dto';
-import { SubjectService } from '../subject/subject.service';
 
 @Injectable()
 export class InterviewService {
@@ -57,8 +55,7 @@ export class InterviewService {
     id: string,
     interviewData: UpdateInterviewDto,
   ): Promise<InterviewDto> {
-    const { programmingLanguageId, ...newInterviewData } =
-      interviewData;
+    const { programmingLanguageId, ...newInterviewData } = interviewData;
 
     const programmingLanguage =
       await this.programmingLanguagesService.readProgrammingLanguage(

@@ -9,5 +9,6 @@ import { ProgrammingLanguageService } from './programming-language.service';
   imports: [TypeOrmModule.forFeature([ProgrammingLanguage])],
   providers: [ProgrammingLanguageService],
   controllers: [ProgrammingLanguageController],
+  exports: [ProgrammingLanguageService],
 })
 export class ProgrammingLanguageModule {}

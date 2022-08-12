@@ -13,5 +13,6 @@ import { TagService } from '../tag/tag.service';
   imports: [TypeOrmModule.forFeature([Subject, Tag, Topic])],
   providers: [SubjectService, TagService, TopicService],
   controllers: [TopicController],
+  exports: [TopicService],
 })
 export class TopicModule {}

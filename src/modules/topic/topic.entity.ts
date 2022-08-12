@@ -5,11 +5,13 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
 
+import { InterviewAnswer } from '../interview-answer/interview-answer.entity';
 import { Question } from '../question/question.entity';
 import { Subject } from '../subject/subject.entity';
 import { Tag } from '../tag/tag.entity';
@@ -44,6 +46,9 @@ export class Topic {
   @ManyToMany(() => Tag, { nullable: true })
   @JoinTable({ name: 'topics_tags' })
   tags?: Tag[];
+
+  @OneToMany(() => InterviewAnswer, (ia) => ia.interview, { nullable: true })
+  answers?: InterviewAnswer[];
 
   @CreateDateColumn()
   createdAt: string;
