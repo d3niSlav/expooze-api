@@ -67,7 +67,7 @@ export class CreateTopicDto {
   readonly tagIds?: string[];
 }
 
-export class UpdateTopicDto extends CreateTopicDto {
+export class EditTopicDto extends CreateTopicDto {
   @IsOptional()
   readonly id?: string;
 }

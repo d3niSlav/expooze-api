@@ -7,6 +7,7 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 
 import {
   CreateProgrammingLanguageDto,
@@ -14,6 +15,7 @@ import {
 } from './programming-language.dto';
 import { ProgrammingLanguageService } from './programming-language.service';
 
+@ApiTags('programming-language')
 @Controller('programmingLanguage')
 export class ProgrammingLanguageController {
   constructor(

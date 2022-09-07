@@ -7,10 +7,12 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 
 import { CreatePositionDto, UpdatePositionDto } from './position.dto';
 import { PositionService } from './position.service';
 
+@ApiTags('position')
 @Controller('position')
 export class PositionController {
   constructor(private readonly positionService: PositionService) {}

@@ -2,6 +2,8 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -10,6 +12,7 @@ import {
 
 import { Interview } from '../interview/interview.entity';
 import { JobTitle } from '../job-title/job-title.entity';
+import { Tag } from '../tag/tag.entity';
 
 @Entity()
 export class Position {
@@ -29,6 +32,10 @@ export class Position {
 
   @ManyToOne(() => JobTitle, (jobTitle) => jobTitle.positions)
   jobTitle: JobTitle;
+
+  @ManyToMany(() => Tag, { nullable: true })
+  @JoinTable({ name: 'job_titles_tags' })
+  tags?: Tag[];
 
   @CreateDateColumn()
   createdAt: string;

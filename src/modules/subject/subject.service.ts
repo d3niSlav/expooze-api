@@ -2,8 +2,10 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { CreateSubjectDto, SubjectDto, UpdateSubjectDto } from './subject.dto';
+import { CreateSubjectDto, SubjectDto, EditSubjectDto } from './subject.dto';
 import { Subject } from './subject.entity';
+import { ListDto, PaginationParamsDto, SortOrderDto } from '../../utils/types';
+import { getTotalPages, prepareSortOrder } from '../../utils/helpers';
 
 @Injectable()
 export class SubjectService {
@@ -15,7 +17,9 @@ export class SubjectService {
   async createSubject(subjectData: CreateSubjectDto): Promise<SubjectDto> {
     const newSubject = await this.subjectsRepository.create(subjectData);
 
-    return await this.subjectsRepository.save(newSubject);
+    const subject = await this.subjectsRepository.save(newSubject);
+
+    return this.readSubject(subject.id);
   }
 
   async readSubject(id: string): Promise<SubjectDto> {
@@ -28,13 +32,9 @@ export class SubjectService {
     return subject;
   }
 
-  async readAllSubjects(): Promise<SubjectDto[]> {
-    return await this.subjectsRepository.find();
-  }
-
   async updateSubject(
     id: string,
-    subjectData: UpdateSubjectDto,
+    subjectData: EditSubjectDto,
   ): Promise<SubjectDto> {
     const subject = await this.readSubject(id);
 
@@ -53,5 +53,37 @@ export class SubjectService {
     }
 
     return affected === 1;
+  }
+
+  async readSubjectsList(
+    paginationParams: PaginationParamsDto,
+    sortOrderDto: SortOrderDto,
+    filters?: any,
+    search?: string,
+  ): Promise<ListDto<SubjectDto>> {
+    const skip = (paginationParams.page - 1) * paginationParams.limit;
+    const take = paginationParams.limit;
+    const { order, sortBy } = sortOrderDto;
+
+    const [result, total] = await this.subjectsRepository.findAndCount({
+      take,
+      skip,
+      order: { [sortBy]: order },
+      relations: ['topics', 'tags'],
+    });
+
+    return {
+      listData: result,
+      pagination: {
+        ...paginationParams,
+        totalCount: total,
+        totalPages: getTotalPages(total, paginationParams.limit),
+      },
+      sortOrder: await prepareSortOrder(sortOrderDto, this.subjectsRepository),
+    };
+  }
+
+  async readAllSubjects(): Promise<SubjectDto[]> {
+    return await this.subjectsRepository.find();
   }
 }

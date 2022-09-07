@@ -11,6 +11,7 @@ import {
 import { InterviewAnswer } from '../interview-answer/interview-answer.entity';
 import { Position } from '../position/position.entity';
 import { ProgrammingLanguage } from '../programmingLanguage/programming-language.entity';
+import { Candidate } from "../candidate/candidate.entity";
 
 @Entity()
 export class Interview {
@@ -19,6 +20,11 @@ export class Interview {
 
   @Column()
   title: string;
+
+  @OneToMany(() => Candidate, (candidate) => candidate.interviews, {
+    nullable: true,
+  })
+  candidate?: Candidate[];
 
   @ManyToOne(() => Position, (position) => position.interviews)
   position: Position;

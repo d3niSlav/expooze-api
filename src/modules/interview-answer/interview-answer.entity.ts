@@ -32,6 +32,9 @@ export class InterviewAnswer {
   @Column()
   status: string;
 
+  @Column({ nullable: true })
+  comment?: string;
+
   @CreateDateColumn()
   createdAt: string;
 

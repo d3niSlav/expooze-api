@@ -8,7 +8,7 @@ export class QuestionDto implements Question {
   readonly id: string;
 
   @IsNotEmpty()
-  readonly title: string;
+  readonly text: string;
 
   @IsOptional()
   @IsArray()
@@ -24,10 +24,10 @@ export class QuestionDto implements Question {
 export class CreateQuestionDto {
   @IsString()
   @IsNotEmpty()
-  readonly title: string;
+  readonly text: string;
 }
 
-export class UpdateQuestionDto extends CreateQuestionDto {
+export class EditQuestionDto extends CreateQuestionDto {
   @IsOptional()
   readonly id?: string;
 }

@@ -2,7 +2,6 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ValidationError } from 'class-validator';
-import * as cors from 'cors';
 
 import { BadRequestExceptionFilter } from './exceptions/bad-request.filter';
 import { mapErrorMessagesFromValidator } from './exceptions/exceptions.helpers';
@@ -14,7 +13,7 @@ import { AppModule } from './modules/app/app.module';
 import { TrimBodyPipe } from './utils/pipes/trim-body.pipe';
 
 // eslint-disable-next-line
-require('dotenv').config();
+require("dotenv").config();
 
 const port = process.env.PORT || 3000;
 
@@ -27,11 +26,11 @@ async function bootstrap() {
     .setVersion('1.0')
     .build();
 
-  app.use(
-    cors({
-      exposedHeaders: ['Content-Disposition'],
-    }),
-  );
+  app.enableCors({
+    origin: ['http://localhost:3000'],
+    methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    credentials: true,
+  });
 
   app.useGlobalFilters(
     new HttpExceptionFilter(),

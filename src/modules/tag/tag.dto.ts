@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 import { Tag } from './tag.entity';
 
@@ -17,12 +18,13 @@ export class TagDto implements Tag {
 }
 
 export class CreateTagDto {
+  @ApiProperty()
   @IsString()
-  @IsNotEmpty()
   readonly title: string;
 }
 
-export class UpdateTagDto extends CreateTagDto {
-  @IsOptional()
-  readonly id?: string;
+export class EditTagDto extends CreateTagDto {
+  @ApiProperty()
+  @IsString()
+  readonly id: string;
 }

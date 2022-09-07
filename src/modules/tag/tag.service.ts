@@ -2,8 +2,10 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 
-import { CreateTagDto, TagDto, UpdateTagDto } from './tag.dto';
+import { CreateTagDto, TagDto, EditTagDto } from './tag.dto';
 import { Tag } from './tag.entity';
+import { ListDto, PaginationParamsDto, SortOrderDto } from '../../utils/types';
+import { getTotalPages, prepareSortOrder } from '../../utils/helpers';
 
 @Injectable()
 export class TagService {
@@ -15,7 +17,9 @@ export class TagService {
   async createTag(tagData: CreateTagDto): Promise<TagDto> {
     const newTag = await this.tagsRepository.create(tagData);
 
-    return await this.tagsRepository.save(newTag);
+    const tag = await this.tagsRepository.save(newTag);
+
+    return this.readTag(tag.id);
   }
 
   async readTag(id: string): Promise<TagDto> {
@@ -28,20 +32,7 @@ export class TagService {
     return tag;
   }
 
-  async readAllTags(filters?: { ids?: string[] }): Promise<TagDto[]> {
-    let filter = {};
-
-    if (filters?.ids?.length > 0) {
-      filter = {
-        ...filter,
-        id: In(filters.ids),
-      };
-    }
-
-    return await this.tagsRepository.find({ where: filter });
-  }
-
-  async updateTag(id: string, tagData: UpdateTagDto): Promise<TagDto> {
+  async updateTag(id: string, tagData: EditTagDto): Promise<TagDto> {
     const tag = await this.readTag(id);
 
     return await this.tagsRepository.save({ ...tag, ...tagData, id });
@@ -55,5 +46,48 @@ export class TagService {
     }
 
     return affected === 1;
+  }
+
+  async readAllTags(filters?: { ids?: string[] }): Promise<TagDto[]> {
+    let filter = {};
+
+    if (filters?.ids?.length > 0) {
+      filter = {
+        ...filter,
+        id: In(filters.ids),
+      };
+    }
+
+    return await this.tagsRepository.find({
+      where: filter,
+      select: ['id', 'title'],
+    });
+  }
+
+  async readTagsList(
+    paginationParams: PaginationParamsDto,
+    sortOrderDto: SortOrderDto,
+    filters?: any,
+    search?: string,
+  ): Promise<ListDto<TagDto>> {
+    const skip = (paginationParams.page - 1) * paginationParams.limit;
+    const take = paginationParams.limit;
+    const { order, sortBy } = sortOrderDto;
+
+    const [result, total] = await this.tagsRepository.findAndCount({
+      take,
+      skip,
+      order: { [sortBy]: order },
+    });
+
+    return {
+      listData: result,
+      pagination: {
+        ...paginationParams,
+        totalCount: total,
+        totalPages: getTotalPages(total, paginationParams.limit),
+      },
+      sortOrder: await prepareSortOrder(sortOrderDto, this.tagsRepository),
+    };
   }
 }

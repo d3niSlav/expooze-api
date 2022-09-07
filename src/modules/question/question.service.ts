@@ -4,10 +4,12 @@ import { Repository } from 'typeorm';
 
 import {
   CreateQuestionDto,
+  EditQuestionDto,
   QuestionDto,
-  UpdateQuestionDto,
 } from './question.dto';
 import { Question } from './question.entity';
+import { ListDto, PaginationParamsDto, SortOrderDto } from '../../utils/types';
+import { getTotalPages, prepareSortOrder } from '../../utils/helpers';
 
 @Injectable()
 export class QuestionService {
@@ -19,7 +21,9 @@ export class QuestionService {
   async createQuestion(questionData: CreateQuestionDto): Promise<QuestionDto> {
     const newQuestion = await this.questionsRepository.create(questionData);
 
-    return await this.questionsRepository.save(newQuestion);
+    const question = await this.questionsRepository.save(newQuestion);
+
+    return this.readQuestion(question.id);
   }
 
   async readQuestion(id: string): Promise<QuestionDto> {
@@ -34,13 +38,9 @@ export class QuestionService {
     return question;
   }
 
-  async readAllQuestions(): Promise<QuestionDto[]> {
-    return await this.questionsRepository.find();
-  }
-
   async updateQuestion(
     id: string,
-    questionData: UpdateQuestionDto,
+    questionData: EditQuestionDto,
   ): Promise<QuestionDto> {
     const question = await this.readQuestion(id);
 
@@ -59,5 +59,37 @@ export class QuestionService {
     }
 
     return affected === 1;
+  }
+
+  async readQuestionsList(
+    paginationParams: PaginationParamsDto,
+    sortOrderDto: SortOrderDto,
+    filters?: any,
+    search?: string,
+  ): Promise<ListDto<QuestionDto>> {
+    const skip = (paginationParams.page - 1) * paginationParams.limit;
+    const take = paginationParams.limit;
+    const { order, sortBy } = sortOrderDto;
+
+    const [result, total] = await this.questionsRepository.findAndCount({
+      take,
+      skip,
+      order: { [sortBy]: order },
+      relations: ['topics'],
+    });
+
+    return {
+      listData: result,
+      pagination: {
+        ...paginationParams,
+        totalCount: total,
+        totalPages: getTotalPages(total, paginationParams.limit),
+      },
+      sortOrder: await prepareSortOrder(sortOrderDto, this.questionsRepository),
+    };
+  }
+
+  async readAllQuestions(): Promise<QuestionDto[]> {
+    return await this.questionsRepository.find();
   }
 }

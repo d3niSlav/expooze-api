@@ -16,6 +16,10 @@ import { PositionModule } from '../position/position.module';
 import { ProgrammingLanguageModule } from '../programmingLanguage/programming-language.module';
 import { QuestionModule } from '../question/question.module';
 import { InterviewAnswerModule } from '../interview-answer/interview-answer.module';
+import { WorkExperienceModule } from '../work-experience/work-experience.module';
+import { CandidateModule } from '../candidate/candidate.module';
+import { EmployeeModule } from '../employee/employee.module';
+import { EmployeeHistoryModule } from '../employee-history/employee-history.module';
 
 @Module({
   imports: [
@@ -46,6 +50,10 @@ import { InterviewAnswerModule } from '../interview-answer/interview-answer.modu
     InterviewModule,
     InterviewAnswerModule,
     JobTitleModule,
+    WorkExperienceModule,
+    CandidateModule,
+    EmployeeModule,
+    EmployeeHistoryModule,
     UserModule,
   ],
   controllers: [AppController],

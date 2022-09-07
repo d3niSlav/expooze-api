@@ -18,7 +18,7 @@ export class Question {
   id: string;
 
   @Column()
-  title: string;
+  text: string;
 
   @ManyToMany(() => Topic, (topic) => topic.questions, { nullable: true })
   @JoinTable({ name: 'topics_questions' })

@@ -6,37 +6,98 @@ import {
   Param,
   Post,
   Put,
+  Query,
+  UseGuards,
 } from '@nestjs/common';
+import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
 
-import { CreateTagDto, UpdateTagDto } from './tag.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CreateTagDto, EditTagDto, TagDto } from './tag.dto';
 import { TagService } from './tag.service';
+import { SUCCESS } from '../../utils/constants';
+import {
+  BasicSuccessResponseDto,
+  PaginationParamsDto,
+  SortOrderDto,
+  SuccessResponseDto,
+} from '../../utils/types';
+import { Tag } from './tag.entity';
 
+@ApiTags('tag')
+// @UseGuards(JwtAuthGuard)
 @Controller('tag')
 export class TagController {
   constructor(private readonly tagService: TagService) {}
 
   @Post()
-  createTag(@Body() data: CreateTagDto) {
-    return this.tagService.createTag(data);
+  @ApiOperation({ summary: 'Create a tag' })
+  async createTag(
+    @Body() data: CreateTagDto,
+  ): Promise<SuccessResponseDto<TagDto>> {
+    const tag = await this.tagService.createTag(data);
+
+    return {
+      message: SUCCESS,
+      data: tag,
+    };
   }
 
-  @Post('list')
-  readAllTags(@Body() filter) {
-    return this.tagService.readAllTags(filter);
-  }
-
+  @ApiOperation({ summary: 'Read a tag by ID' })
   @Get(':id')
-  readTag(@Param('id') id) {
-    return this.tagService.readTag(id);
+  async readTag(@Param('id') id): Promise<SuccessResponseDto<TagDto>> {
+    const tag = await this.tagService.readTag(id);
+
+    return {
+      message: SUCCESS,
+      data: tag,
+    };
   }
 
+  @ApiOperation({ summary: 'Update a tag' })
   @Put(':id')
-  updateTag(@Param('id') id, @Body() data: UpdateTagDto) {
-    return this.tagService.updateTag(id, data);
+  async updateTag(
+    @Param('id') id,
+    @Body() data: EditTagDto,
+  ): Promise<SuccessResponseDto<TagDto>> {
+    const tag = await this.tagService.updateTag(id, data);
+
+    return {
+      message: SUCCESS,
+      data: tag,
+    };
   }
 
+  @ApiOperation({ summary: 'Delete a tag' })
   @Delete(':id')
-  deleteTag(@Param('id') id) {
-    return this.tagService.deleteTag(id);
+  async deleteInterviewAnswer(
+    @Param('id') id,
+  ): Promise<BasicSuccessResponseDto> {
+    await this.tagService.deleteTag(id);
+
+    return {
+      message: SUCCESS,
+    };
+  }
+
+  @ApiOperation({ summary: 'Read a list of tags' })
+  @Get()
+  async readTagsList(
+    @Query() paginationParams: PaginationParamsDto,
+    @Query() sortOrderParams: SortOrderDto,
+    @Query('search') search?: string,
+  ): Promise<SuccessResponseDto<Tag[]>> {
+    const tags = await this.tagService.readTagsList(
+      paginationParams,
+      sortOrderParams,
+      {},
+      search,
+    );
+
+    return {
+      message: SUCCESS,
+      data: tags.listData,
+      pagination: tags.pagination,
+      sortOrder: sortOrderParams,
+    };
   }
 }

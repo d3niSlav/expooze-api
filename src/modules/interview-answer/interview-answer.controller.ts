@@ -7,6 +7,7 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
+import { ApiTags } from "@nestjs/swagger";
 
 import {
   CreateInterviewAnswerDto,
@@ -14,6 +15,7 @@ import {
 } from './interview-answer.dto';
 import { InterviewAnswerService } from './interview-answer.service';
 
+@ApiTags('interview-answer')
 @Controller('interviewAnswer')
 export class InterviewAnswerController {
   constructor(

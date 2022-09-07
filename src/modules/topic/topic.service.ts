@@ -2,12 +2,14 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { CreateTopicDto, TopicDto, UpdateTopicDto } from './topic.dto';
+import { CreateTopicDto, TopicDto, EditTopicDto } from './topic.dto';
 import { Topic } from './topic.entity';
 import { SubjectDto } from '../subject/subject.dto';
 import { SubjectService } from '../subject/subject.service';
 import { TagDto } from '../tag/tag.dto';
 import { TagService } from '../tag/tag.service';
+import { ListDto, PaginationParamsDto, SortOrderDto } from '../../utils/types';
+import { getTotalPages, prepareSortOrder } from '../../utils/helpers';
 
 @Injectable()
 export class TopicService {
@@ -50,11 +52,7 @@ export class TopicService {
     return topic;
   }
 
-  async readAllTopics(): Promise<TopicDto[]> {
-    return await this.topicsRepository.find();
-  }
-
-  async updateTopic(id: string, topicData: UpdateTopicDto): Promise<TopicDto> {
+  async updateTopic(id: string, topicData: EditTopicDto): Promise<TopicDto> {
     const { subjectId, tagIds, ...newTopicData } = topicData;
 
     const topic = await this.readTopic(id);
@@ -98,5 +96,37 @@ export class TopicService {
     }
 
     return affected === 1;
+  }
+
+  async readTopicsList(
+    paginationParams: PaginationParamsDto,
+    sortOrderDto: SortOrderDto,
+    filters?: any,
+    search?: string,
+  ): Promise<ListDto<TopicDto>> {
+    const skip = (paginationParams.page - 1) * paginationParams.limit;
+    const take = paginationParams.limit;
+    const { order, sortBy } = sortOrderDto;
+
+    const [result, total] = await this.topicsRepository.findAndCount({
+      take,
+      skip,
+      order: { [sortBy]: order },
+      relations: ['tags', 'subject', 'questions'],
+    });
+
+    return {
+      listData: result,
+      pagination: {
+        ...paginationParams,
+        totalCount: total,
+        totalPages: getTotalPages(total, paginationParams.limit),
+      },
+      sortOrder: await prepareSortOrder(sortOrderDto, this.topicsRepository),
+    };
+  }
+
+  async readAllTopics(): Promise<TopicDto[]> {
+    return await this.topicsRepository.find();
   }
 }

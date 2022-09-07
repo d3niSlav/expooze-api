@@ -53,7 +53,7 @@ export class CreateSubjectDto {
   readonly tagIds?: string[];
 }
 
-export class UpdateSubjectDto extends CreateSubjectDto {
+export class EditSubjectDto extends CreateSubjectDto {
   @IsOptional()
   readonly id?: string;
 }
