@@ -1,9 +1,12 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import slugify from 'slugify';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
-import { CreateJobTitleDto, EditJobTitleDto, JobTitleDto } from "./job-title.dto";
+import {
+  CreateJobTitleDto,
+  EditJobTitleDto,
+  JobTitleDto,
+} from './job-title.dto';
 import { JobTitle } from './job-title.entity';
 import { getTotalPages, prepareSortOrder } from '../../utils/helpers';
 import { ListDto, PaginationParamsDto, SortOrderDto } from '../../utils/types';
@@ -51,10 +54,7 @@ export class JobTitleService {
     const { affected } = await this.jobTitlesRepository.delete(id);
 
     if (affected === 0) {
-      throw new HttpException(
-        'Job title not found!',
-        HttpStatus.NOT_FOUND,
-      );
+      throw new HttpException('Job title not found!', HttpStatus.NOT_FOUND);
     }
 
     return affected === 1;
@@ -85,5 +85,24 @@ export class JobTitleService {
       },
       sortOrder: await prepareSortOrder(sortOrderDto, this.jobTitlesRepository),
     };
+  }
+
+  async readAllJobTitles(filters?: {
+    ids?: string[];
+  }): Promise<Pick<JobTitleDto, 'id' | 'title'>[]> {
+    let filter = {};
+
+    if (filters?.ids?.length > 0) {
+      filter = {
+        ...filter,
+        id: In(filters.ids),
+      };
+    }
+
+    return await this.jobTitlesRepository.find({
+      where: filter,
+      select: ['id', 'title'],
+      order: { title: 'asc' },
+    });
   }
 }

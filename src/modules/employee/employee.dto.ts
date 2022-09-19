@@ -28,7 +28,11 @@ export class EmployeeDto implements Employee {
   readonly updatedAt: string;
 }
 
-export class SaveEmployeeDto {
+export class CreateEmployeeDto {
+  @IsUUID('all')
+  @IsNotEmpty()
+  readonly candidateId: string;
+
   @IsUUID('all')
   @IsNotEmpty()
   readonly positionId: string;
@@ -37,13 +41,7 @@ export class SaveEmployeeDto {
   readonly salary: number;
 }
 
-export class CreateEmployeeDto extends SaveEmployeeDto {
-  @IsUUID('all')
-  @IsNotEmpty()
-  readonly candidateId: string;
-}
-
-export class UpdateEmployeeDto extends SaveEmployeeDto {
+export class UpdateEmployeeDto extends CreateEmployeeDto {
   @IsOptional()
   readonly id?: string;
 }

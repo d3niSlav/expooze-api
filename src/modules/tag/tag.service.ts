@@ -48,22 +48,6 @@ export class TagService {
     return affected === 1;
   }
 
-  async readAllTags(filters?: { ids?: string[] }): Promise<TagDto[]> {
-    let filter = {};
-
-    if (filters?.ids?.length > 0) {
-      filter = {
-        ...filter,
-        id: In(filters.ids),
-      };
-    }
-
-    return await this.tagsRepository.find({
-      where: filter,
-      select: ['id', 'title'],
-    });
-  }
-
   async readTagsList(
     paginationParams: PaginationParamsDto,
     sortOrderDto: SortOrderDto,
@@ -89,5 +73,24 @@ export class TagService {
       },
       sortOrder: await prepareSortOrder(sortOrderDto, this.tagsRepository),
     };
+  }
+
+  async readAllTags(filters?: {
+    ids?: string[];
+  }): Promise<Pick<TagDto, 'id' | 'title'>[]> {
+    let filter = {};
+
+    if (filters?.ids?.length > 0) {
+      filter = {
+        ...filter,
+        id: In(filters.ids),
+      };
+    }
+
+    return await this.tagsRepository.find({
+      where: filter,
+      select: ['id', 'title'],
+      order: { title: 'asc' },
+    });
   }
 }

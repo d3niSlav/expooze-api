@@ -25,6 +25,29 @@ import { SUCCESS } from '../../utils/constants';
 export class SubjectController {
   constructor(private readonly subjectService: SubjectService) {}
 
+  @Get('/list')
+  async readAllSubjects(): Promise<
+    SuccessResponseDto<Pick<SubjectDto, 'id' | 'title'>[]>
+  > {
+    const subjectsList = await this.subjectService.readAllSubjects();
+
+    return {
+      message: SUCCESS,
+      data: subjectsList,
+    };
+  }
+
+  @ApiOperation({ summary: 'Read a subject by ID' })
+  @Get(':id')
+  async readSubject(@Param('id') id): Promise<SuccessResponseDto<SubjectDto>> {
+    const subject = await this.subjectService.readSubject(id);
+
+    return {
+      message: SUCCESS,
+      data: subject,
+    };
+  }
+
   @ApiOperation({ summary: 'Read a list of subjects' })
   @Get()
   async readSubjectsList(
@@ -47,28 +70,12 @@ export class SubjectController {
     };
   }
 
-  @Get('/list')
-  readAllSubjects() {
-    return this.subjectService.readAllSubjects();
-  }
-
   @Post()
   @ApiOperation({ summary: 'Create a subject' })
   async createSubject(
     @Body() data: CreateSubjectDto,
   ): Promise<SuccessResponseDto<SubjectDto>> {
     const subject = await this.subjectService.createSubject(data);
-
-    return {
-      message: SUCCESS,
-      data: subject,
-    };
-  }
-
-  @ApiOperation({ summary: 'Read a subject by ID' })
-  @Get(':id')
-  async readSubject(@Param('id') id): Promise<SuccessResponseDto<SubjectDto>> {
-    const subject = await this.subjectService.readSubject(id);
 
     return {
       message: SUCCESS,

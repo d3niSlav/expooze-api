@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from "typeorm";
 
 import {
   CreateQuestionDto,
@@ -8,12 +8,15 @@ import {
   QuestionDto,
 } from './question.dto';
 import { Question } from './question.entity';
+import { TopicDto } from '../topic/topic.dto';
+import { TopicService } from '../topic/topic.service';
 import { ListDto, PaginationParamsDto, SortOrderDto } from '../../utils/types';
 import { getTotalPages, prepareSortOrder } from '../../utils/helpers';
 
 @Injectable()
 export class QuestionService {
   constructor(
+    private topicsService: TopicService,
     @InjectRepository(Question)
     private questionsRepository: Repository<Question>,
   ) {}
@@ -27,8 +30,9 @@ export class QuestionService {
   }
 
   async readQuestion(id: string): Promise<QuestionDto> {
-    const question: QuestionDto = await this.questionsRepository.findOneBy({
-      id,
+    const question: QuestionDto = await this.questionsRepository.findOne({
+      where: { id },
+      relations: ['topics'],
     });
 
     if (!question) {
@@ -42,12 +46,21 @@ export class QuestionService {
     id: string,
     questionData: EditQuestionDto,
   ): Promise<QuestionDto> {
+    const { topicIds, ...updatedQuestion } = questionData;
+
     const question = await this.readQuestion(id);
+
+    let topics: Pick<TopicDto, 'id' | 'title'>[] = [];
+
+    if (topicIds?.length > 0) {
+      topics = await this.topicsService.readAllTopics({ ids: topicIds });
+    }
 
     return await this.questionsRepository.save({
       ...question,
-      ...questionData,
+      ...updatedQuestion,
       id,
+      topics,
     });
   }
 
@@ -89,7 +102,22 @@ export class QuestionService {
     };
   }
 
-  async readAllQuestions(): Promise<QuestionDto[]> {
-    return await this.questionsRepository.find();
+  async readAllQuestions(filters?: {
+    ids?: string[];
+  }): Promise<Pick<QuestionDto, 'id' | 'text'>[]> {
+    let filter = {};
+
+    if (filters?.ids?.length > 0) {
+      filter = {
+        ...filter,
+        id: In(filters.ids),
+      };
+    }
+
+    return await this.questionsRepository.find({
+      where: filter,
+      select: ['id', 'text'],
+      order: { createdAt: 'asc' },
+    });
   }
 }

@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -8,6 +14,8 @@ import {
   UpdateEmployeeDto,
 } from './employee.dto';
 import { Employee } from './employee.entity';
+import { CandidateService } from '../candidate/candidate.service';
+import { JobTitleService } from '../job-title/job-title.service';
 import { ListDto, PaginationParamsDto, SortOrderDto } from '../../utils/types';
 import { getTotalPages, prepareSortOrder } from '../../utils/helpers';
 
@@ -16,10 +24,24 @@ export class EmployeeService {
   constructor(
     @InjectRepository(Employee)
     private employeesRepository: Repository<Employee>,
+    @Inject(forwardRef(() => CandidateService))
+    private candidatesService: CandidateService,
+    @Inject(forwardRef(() => JobTitleService))
+    private jobTitlesService: JobTitleService,
   ) {}
 
   async createEmployee(employeeData: CreateEmployeeDto): Promise<EmployeeDto> {
-    const newEmployee = await this.employeesRepository.create(employeeData);
+    const { candidateId, positionId, ...newEmployeeData } = employeeData;
+
+    const candidate = await this.candidatesService.readCandidate(candidateId);
+
+    const position = await this.jobTitlesService.readJobTitle(positionId);
+
+    const newEmployee = await this.employeesRepository.create({
+      ...newEmployeeData,
+      candidate,
+      position,
+    });
 
     const employee = await this.employeesRepository.save(newEmployee);
 
@@ -27,8 +49,9 @@ export class EmployeeService {
   }
 
   async readEmployee(id: string): Promise<EmployeeDto> {
-    const employee: EmployeeDto = await this.employeesRepository.findOneBy({
-      id,
+    const employee: EmployeeDto = await this.employeesRepository.findOne({
+      where: { id },
+      relations: ['candidate', 'position'],
     });
 
     if (!employee) {
@@ -42,12 +65,20 @@ export class EmployeeService {
     id: string,
     employeeData: UpdateEmployeeDto,
   ): Promise<EmployeeDto> {
+    const { candidateId, positionId, ...updatedEmployeeData } = employeeData;
+
+    const candidate = await this.candidatesService.readCandidate(candidateId);
+
+    const position = await this.jobTitlesService.readJobTitle(positionId);
+
     const employee = await this.readEmployee(id);
 
     return await this.employeesRepository.save({
       ...employee,
-      ...employeeData,
+      ...updatedEmployeeData,
       id,
+      candidate,
+      position,
     });
   }
 
@@ -75,6 +106,7 @@ export class EmployeeService {
       take,
       skip,
       order: { [sortBy]: order },
+      relations: ['candidate', 'position'],
     });
 
     return {

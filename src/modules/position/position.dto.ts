@@ -11,6 +11,9 @@ export class PositionDto implements Position {
   @IsNotEmpty()
   readonly title: string;
 
+  @IsOptional()
+  readonly description?: string;
+
   @IsNotEmpty()
   readonly jobTitle: JobTitleDto;
 
@@ -29,6 +32,13 @@ export class CreatePositionDto {
   @IsString()
   @IsNotEmpty()
   readonly title: string;
+
+  @IsString()
+  @IsNotEmpty()
+  readonly jobTitleId: string;
+
+  @IsOptional()
+  readonly description?: string;
 }
 
 export class UpdatePositionDto extends CreatePositionDto {

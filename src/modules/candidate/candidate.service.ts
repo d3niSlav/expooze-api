@@ -10,6 +10,7 @@ import {
 import { Candidate } from './candidate.entity';
 import { ListDto, PaginationParamsDto, SortOrderDto } from '../../utils/types';
 import { getTotalPages, prepareSortOrder } from '../../utils/helpers';
+import { PositionDto } from '../position/position.dto';
 
 @Injectable()
 export class CandidateService {
@@ -63,24 +64,6 @@ export class CandidateService {
     return affected === 1;
   }
 
-  async readAllCandidates(filters?: {
-    ids?: string[];
-  }): Promise<CandidateDto[]> {
-    let filter = {};
-
-    if (filters?.ids?.length > 0) {
-      filter = {
-        ...filter,
-        id: In(filters.ids),
-      };
-    }
-
-    return await this.candidatesRepository.find({
-      where: filter,
-      select: ['id', 'firstName', 'lastName'],
-    });
-  }
-
   async readCandidatesList(
     paginationParams: PaginationParamsDto,
     sortOrderDto: SortOrderDto,
@@ -109,5 +92,24 @@ export class CandidateService {
         this.candidatesRepository,
       ),
     };
+  }
+
+  async readAllCandidates(filters?: {
+    ids?: string[];
+  }): Promise<Pick<CandidateDto, 'id' | 'firstName' | 'lastName' | 'email'>[]> {
+    let filter = {};
+
+    if (filters?.ids?.length > 0) {
+      filter = {
+        ...filter,
+        id: In(filters.ids),
+      };
+    }
+
+    return await this.candidatesRepository.find({
+      where: filter,
+      select: ['id', 'firstName', 'lastName', 'email'],
+      order: { firstName: 'asc' },
+    });
   }
 }

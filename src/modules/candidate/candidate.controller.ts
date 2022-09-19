@@ -9,7 +9,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import {
@@ -32,6 +32,45 @@ import { Candidate } from './candidate.entity';
 @Controller('candidate')
 export class CandidateController {
   constructor(private readonly candidateService: CandidateService) {}
+
+  @ApiOperation({
+    summary: 'Read a list of all candidates',
+  })
+  @Get('/list')
+  async readAllCandidates(): Promise<
+    SuccessResponseDto<
+      Pick<CandidateDto, 'id' | 'firstName' | 'lastName' | 'email'>[]
+    >
+  > {
+    const candidatesList = await this.candidateService.readAllCandidates();
+
+    return {
+      message: SUCCESS,
+      data: candidatesList,
+    };
+  }
+
+  @ApiOperation({ summary: 'Read a list of candidates' })
+  @Get()
+  async readCandidatesList(
+    @Query() paginationParams: PaginationParamsDto,
+    @Query() sortOrderParams: SortOrderDto,
+    @Query('search') search?: string,
+  ): Promise<SuccessResponseDto<Candidate[]>> {
+    const candidates = await this.candidateService.readCandidatesList(
+      paginationParams,
+      sortOrderParams,
+      {},
+      search,
+    );
+
+    return {
+      message: SUCCESS,
+      data: candidates.listData,
+      pagination: candidates.pagination,
+      sortOrder: sortOrderParams,
+    };
+  }
 
   @Post()
   @ApiOperation({ summary: 'Create a candidate' })
@@ -82,28 +121,6 @@ export class CandidateController {
 
     return {
       message: SUCCESS,
-    };
-  }
-
-  @ApiOperation({ summary: 'Read a list of candidates' })
-  @Get()
-  async readCandidatesList(
-    @Query() paginationParams: PaginationParamsDto,
-    @Query() sortOrderParams: SortOrderDto,
-    @Query('search') search?: string,
-  ): Promise<SuccessResponseDto<Candidate[]>> {
-    const candidates = await this.candidateService.readCandidatesList(
-      paginationParams,
-      sortOrderParams,
-      {},
-      search,
-    );
-
-    return {
-      message: SUCCESS,
-      data: candidates.listData,
-      pagination: candidates.pagination,
-      sortOrder: sortOrderParams,
     };
   }
 }

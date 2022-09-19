@@ -25,6 +25,10 @@ export class CreateQuestionDto {
   @IsString()
   @IsNotEmpty()
   readonly text: string;
+
+  @IsOptional()
+  @IsArray()
+  readonly topicIds?: string[];
 }
 
 export class EditQuestionDto extends CreateQuestionDto {

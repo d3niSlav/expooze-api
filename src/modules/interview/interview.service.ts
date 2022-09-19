@@ -9,6 +9,8 @@ import {
 } from './interview.dto';
 import { Interview } from './interview.entity';
 import { ProgrammingLanguageService } from '../programmingLanguage/programming-language.service';
+import { ListDto, PaginationParamsDto, SortOrderDto } from '../../utils/types';
+import { getTotalPages, prepareSortOrder } from '../../utils/helpers';
 
 @Injectable()
 export class InterviewService {
@@ -32,7 +34,9 @@ export class InterviewService {
       programmingLanguage,
     });
 
-    return await this.interviewsRepository.save(newInterview);
+    const savedInterview = await this.interviewsRepository.save(newInterview);
+
+    return this.readInterview(savedInterview.id);
   }
 
   async readInterview(id: string): Promise<InterviewDto> {
@@ -45,10 +49,6 @@ export class InterviewService {
     }
 
     return interview;
-  }
-
-  async readAllInterviews(): Promise<InterviewDto[]> {
-    return await this.interviewsRepository.find();
   }
 
   async updateInterview(
@@ -80,5 +80,39 @@ export class InterviewService {
     }
 
     return affected === 1;
+  }
+
+  async readInterviewsList(
+    paginationParams: PaginationParamsDto,
+    sortOrderDto: SortOrderDto,
+    filters?: any,
+    search?: string,
+  ): Promise<ListDto<Interview>> {
+    const skip = (paginationParams.page - 1) * paginationParams.limit;
+    const take = paginationParams.limit;
+    const { order, sortBy } = sortOrderDto;
+
+    const [result, total] = await this.interviewsRepository.findAndCount({
+      take,
+      skip,
+      order: { [sortBy]: order },
+    });
+
+    return {
+      listData: result,
+      pagination: {
+        ...paginationParams,
+        totalCount: total,
+        totalPages: getTotalPages(total, paginationParams.limit),
+      },
+      sortOrder: await prepareSortOrder(
+        sortOrderDto,
+        this.interviewsRepository,
+      ),
+    };
+  }
+
+  async readAllInterviews(): Promise<InterviewDto[]> {
+    return await this.interviewsRepository.find();
   }
 }

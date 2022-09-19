@@ -1,6 +1,12 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 import { CreateTopicDto, TopicDto, EditTopicDto } from './topic.dto';
 import { Topic } from './topic.entity';
@@ -14,17 +20,19 @@ import { getTotalPages, prepareSortOrder } from '../../utils/helpers';
 @Injectable()
 export class TopicService {
   constructor(
-    private subjectsService: SubjectService,
-    private tagsService: TagService,
     @InjectRepository(Topic)
     private topicsRepository: Repository<Topic>,
+    @Inject(forwardRef(() => SubjectService))
+    private subjectsService: SubjectService,
+    @Inject(forwardRef(() => TagService))
+    private tagsService: TagService,
   ) {}
 
   async createTopic(topicData: CreateTopicDto): Promise<TopicDto> {
     const { subjectId, tagIds, ...topic } = topicData;
 
     const subject = await this.subjectsService.readSubject(subjectId);
-    let tags: TagDto[] = [];
+    let tags: Pick<TagDto, 'id' | 'title'>[] = [];
 
     if (tagIds?.length > 0) {
       tags = await this.tagsService.readAllTags({ ids: tagIds });
@@ -57,7 +65,7 @@ export class TopicService {
 
     const topic = await this.readTopic(id);
     let subject: SubjectDto = topic.subject;
-    let tags: TagDto[] = topic.tags;
+    let tags: Pick<TagDto, 'id' | 'title'>[] = topic.tags;
 
     if (tagIds?.length > 0) {
       const newTagIds = tagIds.filter(
@@ -126,7 +134,22 @@ export class TopicService {
     };
   }
 
-  async readAllTopics(): Promise<TopicDto[]> {
-    return await this.topicsRepository.find();
+  async readAllTopics(filters?: {
+    ids?: string[];
+  }): Promise<Pick<TopicDto, 'id' | 'title'>[]> {
+    let filter = {};
+
+    if (filters?.ids?.length > 0) {
+      filter = {
+        ...filter,
+        id: In(filters.ids),
+      };
+    }
+
+    return await this.topicsRepository.find({
+      where: filter,
+      select: ['id', 'title'],
+      order: { order: 'asc' },
+    });
   }
 }

@@ -25,6 +25,19 @@ import { SUCCESS } from '../../utils/constants';
 export class TopicController {
   constructor(private readonly topicService: TopicService) {}
 
+  @ApiOperation({ summary: 'Read a list of all questions - id and text only' })
+  @Get('/list')
+  async readAllTopics(): Promise<
+    SuccessResponseDto<Pick<TopicDto, 'id' | 'title'>[]>
+  > {
+    const tagsList = await this.topicService.readAllTopics();
+
+    return {
+      message: SUCCESS,
+      data: tagsList,
+    };
+  }
+
   @ApiOperation({ summary: 'Read a list of topics' })
   @Get()
   async readSubjectsList(
@@ -45,11 +58,6 @@ export class TopicController {
       pagination: topics.pagination,
       sortOrder: sortOrderParams,
     };
-  }
-
-  @Get('/list')
-  readAllTopics() {
-    return this.topicService.readAllTopics();
   }
 
   @Post()

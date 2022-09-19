@@ -1,21 +1,45 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 import { CreateSubjectDto, SubjectDto, EditSubjectDto } from './subject.dto';
 import { Subject } from './subject.entity';
+import { TagDto } from '../tag/tag.dto';
+import { TagService } from '../tag/tag.service';
+import { TopicDto } from '../topic/topic.dto';
+import { TopicService } from '../topic/topic.service';
 import { ListDto, PaginationParamsDto, SortOrderDto } from '../../utils/types';
 import { getTotalPages, prepareSortOrder } from '../../utils/helpers';
 
 @Injectable()
 export class SubjectService {
   constructor(
+    private tagsService: TagService,
+    private topicsService: TopicService,
     @InjectRepository(Subject)
     private subjectsRepository: Repository<Subject>,
   ) {}
 
   async createSubject(subjectData: CreateSubjectDto): Promise<SubjectDto> {
-    const newSubject = await this.subjectsRepository.create(subjectData);
+    const { tagIds, topicIds, ...newSubjectData } = subjectData;
+
+    let tags: Pick<TagDto, 'id' | 'title'>[] = [];
+
+    if (tagIds?.length > 0) {
+      tags = await this.tagsService.readAllTags({ ids: tagIds });
+    }
+
+    const topics: Pick<TopicDto, 'id' | 'title'>[] = [];
+
+    if (topicIds?.length > 0) {
+      tags = await this.topicsService.readAllTopics({ ids: topicIds });
+    }
+
+    const newSubject = await this.subjectsRepository.create({
+      ...newSubjectData,
+      tags,
+      topics,
+    });
 
     const subject = await this.subjectsRepository.save(newSubject);
 
@@ -23,7 +47,10 @@ export class SubjectService {
   }
 
   async readSubject(id: string): Promise<SubjectDto> {
-    const subject: SubjectDto = await this.subjectsRepository.findOneBy({ id });
+    const subject: SubjectDto = await this.subjectsRepository.findOne({
+      where: { id },
+      relations: ['tags', 'topics'],
+    });
 
     if (!subject) {
       throw new HttpException('Subject not found!', HttpStatus.NOT_FOUND);
@@ -36,12 +63,27 @@ export class SubjectService {
     id: string,
     subjectData: EditSubjectDto,
   ): Promise<SubjectDto> {
+    const { tagIds, topicIds, ...updatedSubjectData } = subjectData;
     const subject = await this.readSubject(id);
+
+    let tags: Pick<TagDto, 'id' | 'title'>[] = [];
+
+    if (tagIds?.length > 0) {
+      tags = await this.tagsService.readAllTags({ ids: tagIds });
+    }
+
+    const topics: Pick<TopicDto, 'id' | 'title'>[] = [];
+
+    if (topicIds?.length > 0) {
+      tags = await this.topicsService.readAllTopics({ ids: topicIds });
+    }
 
     return await this.subjectsRepository.save({
       ...subject,
-      ...subjectData,
+      ...updatedSubjectData,
       id,
+      tags,
+      topics,
     });
   }
 
@@ -83,7 +125,22 @@ export class SubjectService {
     };
   }
 
-  async readAllSubjects(): Promise<SubjectDto[]> {
-    return await this.subjectsRepository.find();
+  async readAllSubjects(filters?: {
+    ids?: string[];
+  }): Promise<Pick<SubjectDto, 'id' | 'title'>[]> {
+    let filter = {};
+
+    if (filters?.ids?.length > 0) {
+      filter = {
+        ...filter,
+        id: In(filters.ids),
+      };
+    }
+
+    return await this.subjectsRepository.find({
+      where: filter,
+      select: ['id', 'title'],
+      order: { order: 'desc' },
+    });
   }
 }

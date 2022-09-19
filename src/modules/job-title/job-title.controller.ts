@@ -9,7 +9,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiProperty, ApiTags } from "@nestjs/swagger";
+import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import {
@@ -32,6 +32,43 @@ import { JobTitle } from './job-title.entity';
 @Controller('job-title')
 export class JobTitleController {
   constructor(private readonly jobTitleService: JobTitleService) {}
+
+  @ApiOperation({
+    summary: 'Read a list of all job titles - id and title only',
+  })
+  @Get('/list')
+  async readAllJobTitles(): Promise<
+    SuccessResponseDto<Pick<JobTitleDto, 'id' | 'title'>[]>
+  > {
+    const jobTitlesList = await this.jobTitleService.readAllJobTitles();
+
+    return {
+      message: SUCCESS,
+      data: jobTitlesList,
+    };
+  }
+
+  @ApiOperation({ summary: 'Read a list of job titles' })
+  @Get()
+  async readJobTitlesList(
+    @Query() paginationParams: PaginationParamsDto,
+    @Query() sortOrderParams: SortOrderDto,
+    @Query('search') search?: string,
+  ): Promise<SuccessResponseDto<JobTitle[]>> {
+    const jobTitles = await this.jobTitleService.readJobTitlesList(
+      paginationParams,
+      sortOrderParams,
+      {},
+      search,
+    );
+
+    return {
+      message: SUCCESS,
+      data: jobTitles.listData,
+      pagination: jobTitles.pagination,
+      sortOrder: sortOrderParams,
+    };
+  }
 
   @Post()
   @ApiOperation({ summary: 'Create a job title' })
@@ -82,30 +119,6 @@ export class JobTitleController {
 
     return {
       message: SUCCESS,
-    };
-  }
-
-  @ApiOperation({ summary: 'Read a list of job titles' })
-  @Get()
-  async readJobTitlesList(
-    @Query() paginationParams: PaginationParamsDto,
-    @Query() sortOrderParams: SortOrderDto,
-    @Query('search') search?: string,
-  ): Promise<SuccessResponseDto<JobTitle[]>> {
-    console.log(paginationParams);
-    console.log(sortOrderParams);
-    const jobTitles = await this.jobTitleService.readJobTitlesList(
-      paginationParams,
-      sortOrderParams,
-      {},
-      search,
-    );
-
-    return {
-      message: SUCCESS,
-      data: jobTitles.listData,
-      pagination: jobTitles.pagination,
-      sortOrder: sortOrderParams,
     };
   }
 }

@@ -29,6 +29,18 @@ import { SUCCESS } from '../../utils/constants';
 export class QuestionController {
   constructor(private readonly questionService: QuestionService) {}
 
+  @Get('/list')
+  async readAllQuestions(): Promise<
+    SuccessResponseDto<Pick<QuestionDto, 'id' | 'text'>[]>
+  > {
+    const questionsList = await this.questionService.readAllQuestions();
+
+    return {
+      message: SUCCESS,
+      data: questionsList,
+    };
+  }
+
   @ApiOperation({ summary: 'Read a list of questions' })
   @Get()
   async readSubjectsList(
@@ -49,11 +61,6 @@ export class QuestionController {
       pagination: subjects.pagination,
       sortOrder: sortOrderParams,
     };
-  }
-
-  @Get('/list')
-  readAllQuestions() {
-    return this.questionService.readAllQuestions();
   }
 
   @Post()
