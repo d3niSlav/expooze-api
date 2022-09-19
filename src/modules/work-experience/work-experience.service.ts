@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -10,20 +16,36 @@ import {
 import { WorkExperience } from './work-experience.entity';
 import { ListDto, PaginationParamsDto, SortOrderDto } from '../../utils/types';
 import { getTotalPages, prepareSortOrder } from '../../utils/helpers';
+import { Candidate } from '../candidate/candidate.entity';
+import { TagDto } from '../tag/tag.dto';
+import { TagService } from '../tag/tag.service';
 
 @Injectable()
 export class WorkExperienceService {
   constructor(
     @InjectRepository(WorkExperience)
     private workExperiencesRepository: Repository<WorkExperience>,
+    @Inject(forwardRef(() => TagService))
+    private tagsService: TagService,
   ) {}
 
   async createWorkExperience(
     workExperienceData: CreateWorkExperienceDto,
+    candidate: Candidate,
   ): Promise<WorkExperienceDto> {
-    const newWorkExperience = await this.workExperiencesRepository.create(
-      workExperienceData,
-    );
+    const { skillIds, ...newExperienceData } = workExperienceData;
+
+    let tags: Pick<TagDto, 'id' | 'title'>[] = [];
+
+    if (skillIds?.length > 0) {
+      tags = await this.tagsService.readAllTags({ ids: skillIds });
+    }
+
+    const newWorkExperience = await this.workExperiencesRepository.create({
+      ...newExperienceData,
+      candidate,
+      skills: tags,
+    });
 
     const workExperience = await this.workExperiencesRepository.save(
       newWorkExperience,
@@ -34,7 +56,10 @@ export class WorkExperienceService {
 
   async readWorkExperience(id: string): Promise<WorkExperienceDto> {
     const workExperience: WorkExperienceDto =
-      await this.workExperiencesRepository.findOneBy({ id });
+      await this.workExperiencesRepository.findOne({
+        where: { id },
+        relations: ['skills'],
+      });
 
     if (!workExperience) {
       throw new HttpException(

@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 
@@ -8,30 +14,57 @@ import {
   UpdateCandidateDto,
 } from './candidate.dto';
 import { Candidate } from './candidate.entity';
+import { PositionDto } from '../position/position.dto';
+import { PositionService } from '../position/position.service';
+import { WorkExperienceService } from '../work-experience/work-experience.service';
 import { ListDto, PaginationParamsDto, SortOrderDto } from '../../utils/types';
 import { getTotalPages, prepareSortOrder } from '../../utils/helpers';
-import { PositionDto } from '../position/position.dto';
 
 @Injectable()
 export class CandidateService {
   constructor(
     @InjectRepository(Candidate)
     private candidatesRepository: Repository<Candidate>,
+    @Inject(forwardRef(() => PositionService))
+    private positionsService: PositionService,
+    @Inject(forwardRef(() => WorkExperienceService))
+    private workExperienceService: WorkExperienceService,
   ) {}
 
   async createCandidate(
     candidateData: CreateCandidateDto,
   ): Promise<CandidateDto> {
-    const newCandidate = await this.candidatesRepository.create(candidateData);
+    const { experience = [], positionIds, ...data } = candidateData;
+
+    let positions: Pick<PositionDto, 'id' | 'title'>[] = [];
+
+    if (positionIds?.length > 0) {
+      positions = await this.positionsService.readAllPositions({
+        ids: positionIds,
+      });
+    }
+
+    const newCandidate = await this.candidatesRepository.create({
+      ...data,
+      positions,
+    });
 
     const candidate = await this.candidatesRepository.save(newCandidate);
+
+    await experience.forEach((experienceData) => {
+      this.workExperienceService.createWorkExperience(
+        experienceData,
+        candidate,
+      );
+    });
 
     return this.readCandidate(candidate.id);
   }
 
   async readCandidate(id: string): Promise<CandidateDto> {
-    const candidate: CandidateDto = await this.candidatesRepository.findOneBy({
-      id,
+    const candidate: CandidateDto = await this.candidatesRepository.findOne({
+      where: { id },
+      relations: ['positions', 'experience', 'experience.skills'],
     });
 
     if (!candidate) {
@@ -78,6 +111,7 @@ export class CandidateService {
       take,
       skip,
       order: { [sortBy]: order },
+      relations: ['positions', 'experience', 'experience.skills'],
     });
 
     return {

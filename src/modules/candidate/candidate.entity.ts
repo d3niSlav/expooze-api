@@ -9,14 +9,17 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+import { Interview } from '../interview/interview.entity';
 import { Position } from '../position/position.entity';
 import { WorkExperience } from '../work-experience/work-experience.entity';
-import { Interview } from '../interview/interview.entity';
 
 @Entity()
 export class Candidate {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column({ nullable: true, default: 'pending' })
+  status?: string;
 
   @Column()
   firstName: string;
@@ -61,6 +64,24 @@ export class Candidate {
   permanentAddress?: string;
 
   @Column({ nullable: true })
+  linedIn?: string;
+
+  @Column({ nullable: true })
+  facebook?: string;
+
+  @Column({ nullable: true })
+  instagram?: string;
+
+  @Column({ nullable: true })
+  twitter?: string;
+
+  @Column({ nullable: true })
+  whatsApp?: string;
+
+  @Column({ nullable: true })
+  vKontakte?: string;
+
+  @Column({ nullable: true })
   gender?: string;
 
   @Column({ nullable: true })
@@ -79,11 +100,13 @@ export class Candidate {
   @JoinTable({ name: 'candidate_position' })
   positions?: Position[];
 
-  @ManyToMany(() => WorkExperience, { nullable: true })
-  @JoinTable({ name: 'candidate_experience' })
+  @OneToMany(() => WorkExperience, (we) => we.candidate, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
   experience?: WorkExperience[];
 
-  @OneToMany(() => Interview, (interview) => interview.candidate, {
+  @OneToMany(() => Interview, (interview) => interview.candidates, {
     nullable: true,
   })
   interviews?: Interview[];

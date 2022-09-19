@@ -8,6 +8,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 
 import { WorkExperience } from './work-experience.entity';
+import { Candidate } from '../candidate/candidate.entity';
 import { TagDto } from '../tag/tag.dto';
 
 export class WorkExperienceDto implements WorkExperience {
@@ -20,13 +21,16 @@ export class WorkExperienceDto implements WorkExperience {
   @IsNotEmpty()
   readonly seniorityLevel: string;
 
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  readonly years?: number;
+  readonly years?: string;
 
   @IsArray()
   @IsOptional()
   readonly skills?: TagDto[];
+
+  @IsNotEmpty()
+  readonly candidate: Candidate;
 
   @IsArray()
   @IsOptional()
@@ -49,9 +53,9 @@ export class CreateWorkExperienceDto {
   readonly seniorityLevel: string;
 
   @ApiProperty()
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  readonly years?: number;
+  readonly years?: string;
 
   @IsArray()
   @IsOptional()

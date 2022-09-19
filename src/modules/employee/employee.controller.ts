@@ -33,6 +33,18 @@ import { Employee } from './employee.entity';
 export class EmployeeController {
   constructor(private readonly employeeService: EmployeeService) {}
 
+  @Get('/list')
+  async readAllEmployees(): Promise<
+    SuccessResponseDto<Pick<EmployeeDto, 'id'>[]>
+  > {
+    const employees = await this.employeeService.readAllEmployees();
+
+    return {
+      message: SUCCESS,
+      data: employees,
+    };
+  }
+
   @Post()
   @ApiOperation({ summary: 'Create a employee' })
   async createEmployee(

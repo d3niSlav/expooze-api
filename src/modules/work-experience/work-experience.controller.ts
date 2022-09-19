@@ -17,7 +17,9 @@ import {
   EditWorkExperienceDto,
   WorkExperienceDto,
 } from './work-experience.dto';
+import { WorkExperience } from './work-experience.entity';
 import { WorkExperienceService } from './work-experience.service';
+import { Candidate } from '../candidate/candidate.entity';
 import { SUCCESS } from '../../utils/constants';
 import {
   BasicSuccessResponseDto,
@@ -25,7 +27,6 @@ import {
   SortOrderDto,
   SuccessResponseDto,
 } from '../../utils/types';
-import { WorkExperience } from './work-experience.entity';
 
 @ApiTags('workExperience')
 // @UseGuards(JwtAuthGuard)
@@ -37,9 +38,10 @@ export class WorkExperienceController {
   @ApiOperation({ summary: 'Create a workExperience' })
   async createWorkExperience(
     @Body() data: CreateWorkExperienceDto,
+    candidate: Candidate,
   ): Promise<SuccessResponseDto<WorkExperienceDto>> {
     const workExperience =
-      await this.workExperienceService.createWorkExperience(data);
+      await this.workExperienceService.createWorkExperience(data, candidate);
 
     return {
       message: SUCCESS,

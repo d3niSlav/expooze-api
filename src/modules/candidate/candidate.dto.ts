@@ -3,6 +3,7 @@ import { IsNotEmpty, IsOptional } from 'class-validator';
 import { Candidate } from './candidate.entity';
 import { Position } from '../position/position.entity';
 import { WorkExperience } from '../work-experience/work-experience.entity';
+import { CreateWorkExperienceDto } from "../work-experience/work-experience.dto";
 
 export class CandidateDto implements Candidate {
   @IsNotEmpty()
@@ -135,6 +136,9 @@ export class CreateCandidateDto {
 
   @IsOptional()
   readonly workModel?: string;
+
+  @IsOptional()
+  readonly experience?: CreateWorkExperienceDto[];
 
   @IsOptional()
   readonly positionIds?: string[];

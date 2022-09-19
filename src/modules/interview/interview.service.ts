@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -11,6 +17,11 @@ import { Interview } from './interview.entity';
 import { ProgrammingLanguageService } from '../programmingLanguage/programming-language.service';
 import { ListDto, PaginationParamsDto, SortOrderDto } from '../../utils/types';
 import { getTotalPages, prepareSortOrder } from '../../utils/helpers';
+import { PositionService } from '../position/position.service';
+import { CandidateService } from '../candidate/candidate.service';
+import { TagService } from '../tag/tag.service';
+import { TagDto } from '../tag/tag.dto';
+import { CandidateDto } from '../candidate/candidate.dto';
 
 @Injectable()
 export class InterviewService {
@@ -18,20 +29,55 @@ export class InterviewService {
     private programmingLanguagesService: ProgrammingLanguageService,
     @InjectRepository(Interview)
     private interviewsRepository: Repository<Interview>,
+    @Inject(forwardRef(() => PositionService))
+    private positionsService: PositionService,
+    @Inject(forwardRef(() => CandidateService))
+    private candidatesService: CandidateService,
+    @Inject(forwardRef(() => TagService))
+    private tagsService: TagService,
   ) {}
 
   async createInterview(
     interviewData: CreateInterviewDto,
   ): Promise<InterviewDto> {
-    const { programmingLanguageId, ...interview } = interviewData;
+    const {
+      programmingLanguageId,
+      positionId,
+      candidatesIds,
+      tagIds,
+      ...interview
+    } = interviewData;
 
     const programmingLanguage =
       await this.programmingLanguagesService.readProgrammingLanguage(
         programmingLanguageId,
       );
+
+    const position = await this.positionsService.readPosition(positionId);
+
+    let tags: Pick<TagDto, 'id' | 'title'>[] = [];
+
+    if (tagIds?.length > 0) {
+      tags = await this.tagsService.readAllTags({ ids: tagIds });
+    }
+
+    let candidates: Pick<
+      CandidateDto,
+      'id' | 'firstName' | 'lastName' | 'email'
+    >[] = [];
+
+    if (candidatesIds?.length > 0) {
+      candidates = await this.candidatesService.readAllCandidates({
+        ids: candidatesIds,
+      });
+    }
+
     const newInterview = await this.interviewsRepository.create({
       ...interview,
       programmingLanguage,
+      position,
+      tags,
+      candidates,
     });
 
     const savedInterview = await this.interviewsRepository.save(newInterview);
@@ -40,8 +86,9 @@ export class InterviewService {
   }
 
   async readInterview(id: string): Promise<InterviewDto> {
-    const interview: InterviewDto = await this.interviewsRepository.findOneBy({
-      id,
+    const interview: InterviewDto = await this.interviewsRepository.findOne({
+      where: { id },
+      relations: ['candidates', 'position', 'tags', 'programmingLanguage'],
     });
 
     if (!interview) {
@@ -96,6 +143,7 @@ export class InterviewService {
       take,
       skip,
       order: { [sortBy]: order },
+      relations: ['programmingLanguage', 'tags', 'position', 'candidates'],
     });
 
     return {

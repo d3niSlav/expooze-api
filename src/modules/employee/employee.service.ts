@@ -6,7 +6,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from "typeorm";
 
 import {
   CreateEmployeeDto,
@@ -18,6 +18,7 @@ import { CandidateService } from '../candidate/candidate.service';
 import { JobTitleService } from '../job-title/job-title.service';
 import { ListDto, PaginationParamsDto, SortOrderDto } from '../../utils/types';
 import { getTotalPages, prepareSortOrder } from '../../utils/helpers';
+import { SubjectDto } from "../subject/subject.dto";
 
 @Injectable()
 export class EmployeeService {
@@ -118,5 +119,24 @@ export class EmployeeService {
       },
       sortOrder: await prepareSortOrder(sortOrderDto, this.employeesRepository),
     };
+  }
+
+  async readAllEmployees(filters?: {
+    ids?: string[];
+  }): Promise<Pick<EmployeeDto, 'id'>[]> {
+    let filter = {};
+
+    if (filters?.ids?.length > 0) {
+      filter = {
+        ...filter,
+        id: In(filters.ids),
+      };
+    }
+
+    return await this.employeesRepository.find({
+      where: filter,
+      select: ['id'],
+      order: { createdAt: 'asc' },
+    });
   }
 }

@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 import {
   CreateProgrammingLanguageDto,
@@ -8,6 +8,7 @@ import {
   UpdateProgrammingLanguageDto,
 } from './programming-language.dto';
 import { ProgrammingLanguage } from './programming-language.entity';
+import { SubjectDto } from '../subject/subject.dto';
 
 @Injectable()
 export class ProgrammingLanguageService {
@@ -41,10 +42,6 @@ export class ProgrammingLanguageService {
     return programmingLanguage;
   }
 
-  async readAllProgrammingLanguages(): Promise<ProgrammingLanguageDto[]> {
-    return await this.programmingLanguagesRepository.find();
-  }
-
   async updateProgrammingLanguage(
     id: string,
     programmingLanguageData: UpdateProgrammingLanguageDto,
@@ -69,5 +66,24 @@ export class ProgrammingLanguageService {
     }
 
     return affected === 1;
+  }
+
+  async readAllProgrammingLanguages(filters?: {
+    ids?: string[];
+  }): Promise<Pick<SubjectDto, 'id' | 'title'>[]> {
+    let filter = {};
+
+    if (filters?.ids?.length > 0) {
+      filter = {
+        ...filter,
+        id: In(filters.ids),
+      };
+    }
+
+    return await this.programmingLanguagesRepository.find({
+      where: filter,
+      select: ['id', 'title'],
+      order: { title: 'asc' },
+    });
   }
 }

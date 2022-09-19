@@ -2,16 +2,19 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
+import { Candidate } from '../candidate/candidate.entity';
 import { InterviewAnswer } from '../interview-answer/interview-answer.entity';
 import { Position } from '../position/position.entity';
 import { ProgrammingLanguage } from '../programmingLanguage/programming-language.entity';
-import { Candidate } from "../candidate/candidate.entity";
+import { Tag } from '../tag/tag.entity';
 
 @Entity()
 export class Interview {
@@ -21,10 +24,14 @@ export class Interview {
   @Column()
   title: string;
 
-  @OneToMany(() => Candidate, (candidate) => candidate.interviews, {
+  @Column({ nullable: true })
+  interviewDate?: string;
+
+  @ManyToMany(() => Candidate, (candidate) => candidate.interviews, {
     nullable: true,
   })
-  candidate?: Candidate[];
+  @JoinTable({ name: 'candidate_interview' })
+  candidates?: Candidate[];
 
   @ManyToOne(() => Position, (position) => position.interviews)
   position: Position;
@@ -34,6 +41,10 @@ export class Interview {
 
   @OneToMany(() => InterviewAnswer, (ia) => ia.interview, { nullable: true })
   answers?: InterviewAnswer[];
+
+  @ManyToMany(() => Tag, { nullable: true })
+  @JoinTable({ name: 'interview_tags' })
+  tags?: Tag[];
 
   @CreateDateColumn()
   createdAt: string;

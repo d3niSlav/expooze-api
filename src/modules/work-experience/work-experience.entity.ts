@@ -4,16 +4,23 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
+import { Candidate } from '../candidate/candidate.entity';
 import { Tag } from '../tag/tag.entity';
 
 @Entity()
 export class WorkExperience {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @ManyToOne(() => Candidate, (candidate) => candidate.experience, {
+    onDelete: 'CASCADE',
+  })
+  candidate: Candidate;
 
   @Column()
   jobTitle: string;
@@ -22,7 +29,7 @@ export class WorkExperience {
   seniorityLevel: string;
 
   @Column({ nullable: true })
-  years?: number;
+  years?: string;
 
   @ManyToMany(() => Tag, { nullable: true })
   @JoinTable({ name: 'work_experience_tags' })
